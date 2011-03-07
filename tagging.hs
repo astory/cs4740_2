@@ -1,21 +1,13 @@
 import System.IO
 import Data.Char
-import Data.List.Split
+import Data.List as L
 
-import NLPWP
+posTag :: String -> [(String,String)]
+posTag = map (\(h:(t:xs)) -> (h,t)) . map words . lines
 
---import Data.HMM
-
---Turn a string of tags and words into
---a list of a list of tag and word
-sepWords :: String -> [String]
-sepWords []=[]
-sepWords x=splitOn "\n" x
-
-sepTags :: [String] -> [[String]]
-sepTags []=[]
-sepTags (x:xs) = (splitOn " " x):sepTags xs
-
+main = do
+	text <- getContents
+	print $ posTag text
 
 --rawwords="<s> <s>\nNNP Pierre\nNNP Vinken\n, ,\nCD 61\nNNS years\nJJ old\n, ,\nMD will\nVB join\nDT the\nNN board\nIN as\nDT a\nJJ nonexecutive\nNN director\nNNP Nov.\nCD 29\n. ."
 rawwords="<s>\nRockwell\nInternational\nCorp.\n's\nTulsa\nunit\nsaid\nit\nsigned\na\ntentative\nagreement\nextending\nits\ncontract\nwith\nBoeing\nCo.\nto\nprovide\nstructural\nparts\nfor\nBoeing\n's\n747\njetliners\n.\n<s>"
