@@ -1,6 +1,10 @@
 import System.IO
-import Data.Char  
+import Data.Char
 import Data.List.Split
+
+import NLPWP
+
+--import Data.HMM
 
 --Turn a string of tags and words into
 --a list of a list of tag and word
@@ -13,36 +17,17 @@ sepTags []=[]
 sepTags (x:xs) = (splitOn " " x):sepTags xs
 
 
-rawwords="<s> <s>\nNNP Pierre\nNNP Vinken\n, ,\nCD 61\nNNS years\nJJ old\n, ,\nMD will\nVB join\nDT the\nNN board\nIN as\nDT a\nJJ nonexecutive\nNN director\nNNP Nov.\nCD 29\n. ."
+--rawwords="<s> <s>\nNNP Pierre\nNNP Vinken\n, ,\nCD 61\nNNS years\nJJ old\n, ,\nMD will\nVB join\nDT the\nNN board\nIN as\nDT a\nJJ nonexecutive\nNN director\nNNP Nov.\nCD 29\n. ."
+rawwords="<s>\nRockwell\nInternational\nCorp.\n's\nTulsa\nunit\nsaid\nit\nsigned\na\ntentative\nagreement\nextending\nits\ncontract\nwith\nBoeing\nCo.\nto\nprovide\nstructural\nparts\nfor\nBoeing\n's\n747\njetliners\n.\n<s>"
 --test="pos_corpora/test-obs.pos"
 --train="pos_corpora/train.pos"
 
---ngram :: Integer -> String -> 
+
 {-
-ngram n words=
-	wordlist=splitOn "\n" contents
-	head wordlist
-	def ngram(n, words):
-	"""Return a list of n (1 .. n)-gram dictionaries, n >= 1, l[0] is {}, where
-	the keys are tuples of words"""
-	ngrams = [{}]
-	for i in range(1, n+1):
-		d = {}
-		# compute the i-gram model data
-		word_buffer = words[0:i-1]
-		for word in words[i-1:]:
-			word_buffer.append(word)
-			t = tuple(word_buffer)
-			if d.has_key(t):
-				d[t] += 1
-			else:
-				d[t] = 1
-			word_buffer.pop(0)
-		ngrams.append(d)
-	return ngrams
+main = do
+--	rawwords <- readFile test
+	contents = foldl countElem Data.Map.empty (sepWords rawwords)
+	print contents
+	--writeFile "foo.pos" contents
+
 -}
-
---main = do
---	contents <- readFile train
-
---	writeFile "foo.pos" contents
