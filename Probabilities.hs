@@ -9,8 +9,8 @@ type CountMap = M.Map String (M.Map String Int)
 
 {-convert lists of sentences to dictionaries which can give counts of words
 given the tag-}
-add_pair_to_map :: (String, String) -> CountMap -> CountMap
-add_pair_to_map (tag, word) map =
+add_pair_to_map :: CountMap -> (String, String) -> CountMap
+add_pair_to_map map (tag, word) =
         case M.lookup tag map of
             Nothing ->
                 M.insert tag (M.singleton word 1) map
@@ -18,11 +18,12 @@ add_pair_to_map (tag, word) map =
                 M.insert tag (M.insertWith (+) word 1 tagmap) map
 
 val'key :: [[(String, String)]] -> CountMap
-val'key = foldr (\ sent map -> foldr add_pair_to_map map sent) M.empty
+val'key = L.foldl' (\ map sent -> L.foldl' add_pair_to_map map sent) M.empty
 
 default_tag = "NNP"
 
 swap (a,b) = (b,a)
+second = \ (_,a) (_,b) -> a `compare` b
 
 pick_most_frequent :: CountMap -> String -> String
 pick_most_frequent map tag =
@@ -30,7 +31,8 @@ pick_most_frequent map tag =
         Nothing ->
             default_tag
         Just tagmap ->
-            fst . head . L.sortBy (\ (_,a) (_,b) -> a `compare` b) . M.toList $ tagmap
+        -- head is unsafe; the way we build the maps guarantees they are not empty
+            fst . head . L.sortBy second . M.toList $ tagmap
 
 main = do
     training <- getContents
