@@ -18,11 +18,18 @@ We will use good-turing smoothing on transition and lexical generation probabili
 %predictions for the task, and explain how you got them(e.g. wrote your
 %own code, used a package, used the web-based scorer).
 \section{Baseline system}
-Our baseline system includes n-gram extraction.
-It currently does not include the hidden Markov model.
-Instead, it currently selects tags weighted
-to word and tag frequencies but
-without respect for context.
+Our baseline system includes n-gram extraction,
+but we do not use it.
+It does not include the hidden Markov model either.
+
+Instead of using Bayes' rule and using n-grams and hidden Markov models,
+the system assumes that a word's part of speech depends only
+on the word and not on its context. With this assumption,
+The system computes probabilities for each tag given the word.
+It tags the word with the most probable tag.
+
+Unknown words are tagged as proper noun.
+The baseline system does not do any smoothing.
 
 %3. The code for the baseline system if you are implementing from
 %scratch. If you are using a package, do not submit the code.
