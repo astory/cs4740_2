@@ -5,6 +5,7 @@ module Ngram
 , bigram
 , trigram
 , split_tags
+, sentences
 ) where
 
 --Code in this file is from http://nlpwp.org/book/chap-words.xhtml
@@ -57,4 +58,4 @@ main = do
     let tagged_words = posTag text
         sentences' = sentences tagged_words
         (tags, words) = split_tags sentences'
-    putStrLn $ unlines . map show . concat . map trigram $ tags
+    putStrLn $ unlines . map show $ sentences'
