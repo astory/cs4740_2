@@ -52,11 +52,11 @@ baseline = do
         putStrLn $ unlines . map show . zip test_words . map (pick_most_frequent tag'word) $ test_words
         hClose handle
         )
-
+{-
 --This was helpful: http://people.eecs.ku.edu/~esp/publications/c2009ItcTristan.pdf
 pick_viterbi :: CountMap -> String -> String
 pick_viterbi map tag =
-  
+  -}
 
 --Log probabilities
 toLog p = (log . fromIntegral) p
