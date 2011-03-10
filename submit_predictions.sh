@@ -1,6 +1,6 @@
 #!/bin/bash
-netid=tkl22
-predictions_file=$1
+netid=$1
+predictions_file=$2
 params=`cat $predictions_file|sed -n '1 s/^/\ /p' | sed 's/\ / --form-string\ /g'`
 sed -i 1d $predictions_file
 curl -F predictions=@$predictions_file  --form-string netid=tkl22 $params  http://www.cs.cornell.edu/w8/~luwang/cs4740/getFile 
