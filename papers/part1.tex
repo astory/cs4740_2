@@ -1,4 +1,5 @@
 \documentclass{article}
+\usepackage{booktabs}
 %By 11:59pm, Thursday, March 10th, you need to submit:
 %1. A short document that indicates your plan for the project
 \newcommand{\osn}{\oldstylenums}
@@ -22,9 +23,27 @@ the traditional table-based implementation; rather, it will use memoization
 because such an approach is more natural for a functional programming language
 like Haskell.
 
-Our experiments will consider several of a variety of variables: n-gram length,
+\begin{table}
+\begin{tabular}{lcccc}
+\toprule
+& \multicolumn{4}{c}{Factors} \\
+\cmidrule{2-5}
+& & \multicolumn{2}{c}{Smoothing} \\
+\cmidrule{3-4}
+       & $n$-gram length & $n$-gram & Lexical & UNK\\
+\cmidrule{2-5}
+Levels &  2  & None        & None        & None \\
+       &  3  & Good Turing & Good Turing & First occurrance  \\
+       &  \ldots  &             &             &      \\
+\bottomrule
+\end{tabular}
+\caption{\label{tab:ind_vars}Independent variables for experiments on the final system}
+\end{table}
+
+Our experiments will consider several of a variety of variables (table \ref{tab:ind_vars}): n-gram length,
 n-gram smoothing (Good-Turing or none), lexical probability smoothing, unknown
-word handling via at least one method and whether a hidden Markov model is used.
+word handling (counting the first occurrances of words as unknown) and
+whether a hidden Markov model is used (comparison to the baseline).
 We have not yet decided precisely which features we will implement, but we
 aim to target all of them if time allows.
 
@@ -45,6 +64,9 @@ most likely tag.
 
 Unknown words are tagged as proper noun.
 The baseline system does not do any smoothing.
+
+The predictions from the baseline system had a score of 47.83\%
+from the prediction submission form.
 
 %3. The code for the baseline system if you are implementing from
 %scratch. If you are using a package, do not submit the code.
