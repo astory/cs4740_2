@@ -25,7 +25,7 @@ like Haskell.
 
 \begin{table}
 \begin{tabular}{lcccc}
-\toprule
+%\toprule
 & \multicolumn{4}{c}{Factors} \\
 \cmidrule{2-5}
 & & \multicolumn{2}{c}{Smoothing} \\
@@ -35,9 +35,10 @@ like Haskell.
 Levels &  2  & None        & None        & None \\
        &  3  & Good Turing & Good Turing & First occurrance  \\
        &  \vdots  &             &             &      \\
-\bottomrule
+\cmidrule{2-5}
+%\bottomrule
 \end{tabular}
-\caption{\label{tab:ind_vars}Independent variables for experiments on the final system}
+\caption{\label{tab:ind_vars}Independent variables for experiments on the final system with a Hidden Markov Model}
 \end{table}
 
 Our experiments will consider several of a variety of variables (table \ref{tab:ind_vars}): n-gram length,
