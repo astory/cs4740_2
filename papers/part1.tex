@@ -17,7 +17,10 @@ implemented a system to read the input files and produce a usable dictionary of
 arbitrary n-grams (over arbitrary objects, in our case, we will use tags), and
 can produce probabilities for any pair of arbitrary objects taken from a list
 (in our case, words and tags).  These components yield all the data we need to
-compute the Viterbi algorithm.
+compute the Viterbi algorithm.  Our implementation of Viterbi will \emph{not} be
+the traditional table-based implementation; rather, it will use memoization
+because such an approach is more natural for a functional programming language
+like Haskell.
 
 Our experiments will consider several of a variety of variables: n-gram length,
 n-gram smoothing (Good-Turing or none), lexical probability smoothing, unknown
@@ -49,5 +52,6 @@ The baseline system does not do any smoothing.
 \section{The Code}
 
 We recognize that Haskell is a language that may not be installed on your
-machine.
+machine.  Instructions for running our code with (and without!) Haskell
+installed are included in our \verb+Readme+.
 \end{document}
