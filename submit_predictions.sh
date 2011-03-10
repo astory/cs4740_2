@@ -1,9 +1,12 @@
 #!/bin/bash
 netid=$1
 predictions_file=$2
-params=`cat $predictions_file|sed -n '1 s/^/\ /p' | sed 's/\ / --form-string\ /g'`
+firstline=`sed -n '1 p' $predictions_file` 
+params=`echo $firstline|sed 's/^/\ /' | sed 's/\ / --form-string\ /g'`
 sed -i 1d $predictions_file
 curl -F predictions=@$predictions_file  --form-string netid=tkl22 $params  http://www.cs.cornell.edu/w8/~luwang/cs4740/getFile 
+sed -i "1i\
+$firstline" $predictions_file
 
 #istest=1 #0 or 1
 #isbaseline=1 #0 or 1
