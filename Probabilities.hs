@@ -7,7 +7,9 @@ import qualified Data.Map as M
 import qualified Data.List as L
 
 type CountMap = M.Map String (M.Map String Int)
+type Prob = Float
 type LogProb = Float
+
 
 {-convert lists of sentences to dictionaries which can give counts of words
 given the tag-}
@@ -51,20 +53,42 @@ baseline = do
         hClose handle
         )
 
+--This was helpful: http://people.eecs.ku.edu/~esp/publications/c2009ItcTristan.pdf
+pick_viterbi :: CountMap -> String -> String
+pick_viterbi map tag =
+  
 
-
-denom counts sum = sum + counts
-intdiv a b = (fromIntegral a) / (fromIntegral b)
-
+--Log probabilities
 toLog p = (log . fromIntegral) p
 probdiv num denom = toLog  num - toLog denom
 
+--Lexical generation probabilities for a particular word|tag
+denom counts sum = sum + counts
 
-prob ::  String -> String -> CountMap -> Float
-prob word tag word'tag = (word'tag M.! tag M.! word) `probdiv` (M.fold denom 0 (word'tag M.! tag)) 
+lexical :: CountMap -> String -> String -> LogProb
+lexical word'tag word tag = (word'tag M.! tag M.! word) `probdiv` (M.fold denom 0 (word'tag M.! tag)) 
+
+--M.map (lexical "elephant" word'tag) ((S.elems . M.keysSet) word'tag)
 
 
---(S.elems . keysSet) tag
+
+--(S.elems . M.keysSet) word'tag
 
 --let word'tag = (val'key . sentences) [("<s>","<s>"),("NN","director"),("NN","elephant")]
+main = do
+    training <- getContents
+    withFile "pos_corpora/test-obs.pos" ReadMode (\handle -> do 
+        test <- hGetContents handle
+        let tagged_words = posTag training
+            sents = sentences tagged_words
+            sents' = map (map swap) sents
+            word'tag = val'key sents
+            tag'word = val'key sents'
+
+            test_words = lines test
+        putStrLn $ unlines . map show . zip test_words . map (pick_most_frequent tag'word) $ test_words
+        hClose handle
+        )
+
+
 
