@@ -1,8 +1,8 @@
 #!/bin/bash
 netid=tkl22
 predictions_file=baseline.pos
-istest=0 #0 or 1
-isbaseline=0 #0 or 1
+istest=1 #0 or 1
+isbaseline=1 #0 or 1
 degree=2 #n-gram size: 2, 3 or 4 (4 or more)
 casefold=0 #0 or 1
 unkhandle=0 #0 or 1
