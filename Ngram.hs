@@ -39,6 +39,20 @@ bigram = ngrams 2
 trigram :: Kgram a
 trigram = ngrams 3
 
+{- takes a list of sentences of words and n and produces up to the n-grams with
+those words, respecting sentence boundaries -}
+full_ngrams :: Int -> [[a]] -> [[[a]]]
+full_ngrams n xs
+    | n <= 0 = []
+    | otherwise =
+        let l = [1 .. n] :: [Int]
+        -- [[a]] -map-> [[[a]]] -concat-> [[a]]
+        --   ^  ngram k  ^^^^^              ^
+        -- sentences |all ngrams in     |  just a list of ngrams
+        --           |lists per sentence|
+        in map (\k->concat . map (ngrams k) $ xs) l
+        
+
 isStart :: (String,String) -> Bool
 isStart (t,w) = t == "<s>"
 
@@ -58,4 +72,4 @@ main = do
     let tagged_words = posTag text
         sentences' = sentences tagged_words
         (tags, words) = split_tags sentences'
-    putStrLn $ unlines . map show $ sentences'
+    print $ full_ngrams 2 words
