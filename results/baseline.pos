@@ -1,3 +1,4 @@
+ istest=1 isbaseline=1 degree=2 casefold=0 unkhandle=0 transsmoothing=None emitsmoothing=None
 <s> <s>
 NNP Rockwell
 JJ International
