@@ -2,10 +2,12 @@ import System.IO
 import Ngram
 import Tagging
 
+import qualified Data.Set as S
 import qualified Data.Map as M
 import qualified Data.List as L
 
 type CountMap = M.Map String (M.Map String Int)
+type LogProb = Float
 
 {-convert lists of sentences to dictionaries which can give counts of words
 given the tag-}
@@ -34,7 +36,7 @@ pick_most_frequent map tag =
         -- head is unsafe; the way we build the maps guarantees they are not empty
             fst . head . L.sortBy second . M.toList $ tagmap
 
-main = do
+baseline = do
     training <- getContents
     withFile "pos_corpora/test-obs.pos" ReadMode (\handle -> do 
         test <- hGetContents handle
@@ -48,3 +50,21 @@ main = do
         putStrLn $ unlines . map show . zip test_words . map (pick_most_frequent tag'word) $ test_words
         hClose handle
         )
+
+
+
+denom counts sum = sum + counts
+intdiv a b = (fromIntegral a) / (fromIntegral b)
+
+toLog p = (log . fromIntegral) p
+probdiv num denom = toLog  num - toLog denom
+
+
+prob ::  String -> String -> CountMap -> Float
+prob word tag word'tag = (word'tag M.! tag M.! word) `probdiv` (M.fold denom 0 (word'tag M.! tag)) 
+
+
+--(S.elems . keysSet) tag
+
+--let word'tag = (val'key . sentences) [("<s>","<s>"),("NN","director"),("NN","elephant")]
+
