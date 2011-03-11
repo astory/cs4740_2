@@ -23,3 +23,8 @@ row.names(treatments.rand)=sort(id)
 #because it could be confusing.
 
 treatments$time=NULL
+
+#Also run the baseline, but I think it'll be less confusing
+#if it's not in the same frames. Hmm well
+baseline=rep('?',2)
+names(baseline)=c('score','time')
