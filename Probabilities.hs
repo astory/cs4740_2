@@ -75,13 +75,15 @@ lexical word'tag word tag
       -- Otherwise, the probability of the word given the tag
       | otherwise = (word'tag M.! tag M.! word) `probdiv` (M.fold lexDenom 0 (word'tag M.! tag)) 
 
+--Transition probabilities
+transition :: CountMap -> String -> String -> LogProb
+transition word'tag tag tag = 0.1
+
+
 --M.map (lexical "elephant" word'tag) ((S.elems . M.keysSet) word'tag)
-
-
-
 --(S.elems . M.keysSet) word'tag
-
 --let word'tag = (val'key . sentences) [("<s>","<s>"),("NN","director"),("NN","elephant")]
+
 main' = do
     training <- getContents
     withFile "pos_corpora/test-obs.pos" ReadMode (\handle -> do 
@@ -114,7 +116,7 @@ main = do
         --Print just the tags that were guessed
         --print $ map snd $ zip test_words . map (pick_most_frequent tag'word) $ test_words
         
-        --Print the transition probabilities
+        --Print the emission probabilities
         print $ map ( lexical word'tag "director") $ map snd $ zip test_words . map (pick_most_frequent tag'word) $ test_words
         
         --print ( lexical word'tag "director" "NN" )
