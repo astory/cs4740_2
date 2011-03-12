@@ -61,9 +61,11 @@ pick_viterbi map tag =
 toLog p = (log . fromIntegral) p
 probdiv num denom = toLog  num - toLog denom
 
---Lexical generation probabilities for a particular word|tag
-denom counts sum = sum + counts
+--Lexical generation probabilities (emission probabilities) for a particular word|tag
+--Denominator
+lexDenom counts sum = sum + counts
 
+--Everything else
 lexical :: CountMap -> String -> String -> LogProb
 lexical word'tag word tag
        --If the tag occurs in the training corpus
@@ -71,7 +73,7 @@ lexical word'tag word tag
        --If the word occurs with that tag in the training corpus
       | M.notMember word (word'tag M.! tag) = 0
       -- Otherwise, the probability of the word given the tag
-      | otherwise = (word'tag M.! tag M.! word) `probdiv` (M.fold denom 0 (word'tag M.! tag)) 
+      | otherwise = (word'tag M.! tag M.! word) `probdiv` (M.fold lexDenom 0 (word'tag M.! tag)) 
 
 --M.map (lexical "elephant" word'tag) ((S.elems . M.keysSet) word'tag)
 
@@ -106,18 +108,16 @@ main = do
             tag'word = val'key sents'
 
             test_words = lines test
+        --Print the predictions
         --putStrLn $ unlines . (map show) . zip test_words . map (pick_most_frequent tag'word) $ test_words
-        --print $ map (pick_most_frequent tag'word) $ test_words
-        
-        
-        --Print the tags that were guessed
+
+        --Print just the tags that were guessed
         --print $ map snd $ zip test_words . map (pick_most_frequent tag'word) $ test_words
         
-        --Print the probabilities
+        --Print the transition probabilities
         print $ map ( lexical word'tag "director") $ map snd $ zip test_words . map (pick_most_frequent tag'word) $ test_words
         
         --print ( lexical word'tag "director" "NN" )
-        
         hClose handle
         )
 
