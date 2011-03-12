@@ -76,9 +76,14 @@ lexical word'tag word tag
       | otherwise = (word'tag M.! tag M.! word) `probDiv` (M.fold lexDenom 0 (word'tag M.! tag)) 
 
 --Transition probabilities
+{-
 transition :: LogProb -> LogProb -> LogProb -> LogProb
 transition a_t' a_ij b_j = 0
+-}
 
+transition::
+
+--It may help to define a b_j function for a particular tag from lexical
 
 --M.map (lexical "elephant" word'tag) ((S.elems . M.keysSet) word'tag)
 --(S.elems . M.keysSet) word'tag
