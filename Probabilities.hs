@@ -53,7 +53,6 @@ baseline = do
         hClose handle
         )
 {-
---This was helpful: http://people.eecs.ku.edu/~esp/publications/c2009ItcTristan.pdf
 pick_viterbi :: CountMap -> String -> String
 pick_viterbi map tag =
   -}
@@ -75,7 +74,7 @@ lexical word'tag word tag = (word'tag M.! tag M.! word) `probdiv` (M.fold denom 
 --(S.elems . M.keysSet) word'tag
 
 --let word'tag = (val'key . sentences) [("<s>","<s>"),("NN","director"),("NN","elephant")]
-main = do
+main' = do
     training <- getContents
     withFile "pos_corpora/test-obs.pos" ReadMode (\handle -> do 
         test <- hGetContents handle
@@ -87,6 +86,29 @@ main = do
 
             test_words = lines test
         putStrLn $ unlines . map show . zip test_words . map (pick_most_frequent tag'word) $ test_words
+        hClose handle
+        )
+
+main = do
+    training <- getContents
+    withFile "pos_corpora/test-obs_short.pos" ReadMode (\handle -> do 
+        test <- hGetContents handle
+        let tagged_words = posTag training
+            sents = sentences tagged_words
+            sents' = map (map swap) sents
+            word'tag = val'key sents
+            tag'word = val'key sents'
+
+            test_words = lines test
+        --putStrLn $ unlines . (map show) . zip test_words . map (pick_most_frequent tag'word) $ test_words
+        --print $ map (pick_most_frequent tag'word) $ test_words
+        
+        
+        --Print the tags that were guessed
+        print $ map snd $ zip test_words . map (pick_most_frequent tag'word) $ test_words
+        
+        --print ( lexical word'tag "director" "NN" )
+        --print $ map ( lexical word'tag "director") 
         hClose handle
         )
 
