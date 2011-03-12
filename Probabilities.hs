@@ -65,7 +65,13 @@ probdiv num denom = toLog  num - toLog denom
 denom counts sum = sum + counts
 
 lexical :: CountMap -> String -> String -> LogProb
-lexical word'tag word tag = (word'tag M.! tag M.! word) `probdiv` (M.fold denom 0 (word'tag M.! tag)) 
+lexical word'tag word tag
+       --If the tag occurs in the training corpus
+      | M.notMember tag word'tag = 0
+       --If the word occurs with that tag in the training corpus
+      | M.notMember word (word'tag M.! tag) = 0
+      -- Otherwise, the probability of the word given the tag
+      | otherwise = (word'tag M.! tag M.! word) `probdiv` (M.fold denom 0 (word'tag M.! tag)) 
 
 --M.map (lexical "elephant" word'tag) ((S.elems . M.keysSet) word'tag)
 
