@@ -81,9 +81,20 @@ transition :: LogProb -> LogProb -> LogProb -> LogProb
 transition a_t' a_ij b_j = 0
 -}
 
-transition::
-
---It may help to define a b_j function for a particular tag from lexical
+transition:: [[LogProb]]
+transition a
+{-
+  a is a list of times (words in the test set),
+  each time containing a list of path probabilities for each state.
+  
+  (tail a) is a_t-1(i), where i ranges from 1 to N
+  
+  ngrams will give us the transition probabilities a_ij
+  
+  lexical will give us the state observation likelihoods.
+  It may help to define a (b_j o_t) function from lexical
+  for a each particular tag j
+-}
 
 --M.map (lexical "elephant" word'tag) ((S.elems . M.keysSet) word'tag)
 --(S.elems . M.keysSet) word'tag
