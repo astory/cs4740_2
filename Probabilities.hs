@@ -77,13 +77,9 @@ lexical word'tag word tag
 
 --Transition probabilities
 {-
-transition :: LogProb -> LogProb -> LogProb -> LogProb
-transition a_t' a_ij b_j = 0
--}
-
 transition:: [[LogProb]]
 transition a
-{-
+
   a is a list of times (words in the test set),
   each time containing a list of path probabilities for each state.
   
