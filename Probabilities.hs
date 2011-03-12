@@ -59,7 +59,7 @@ pick_viterbi map tag =
 
 --Log probabilities
 toLog p = (log . fromIntegral) p
-probdiv num denom = toLog  num - toLog denom
+probDiv num denom = toLog  num - toLog denom
 
 --Lexical generation probabilities (emission probabilities) for a particular word|tag
 --Denominator
@@ -73,11 +73,11 @@ lexical word'tag word tag
        --If the word occurs with that tag in the training corpus
       | M.notMember word (word'tag M.! tag) = 0
       -- Otherwise, the probability of the word given the tag
-      | otherwise = (word'tag M.! tag M.! word) `probdiv` (M.fold lexDenom 0 (word'tag M.! tag)) 
+      | otherwise = (word'tag M.! tag M.! word) `probDiv` (M.fold lexDenom 0 (word'tag M.! tag)) 
 
 --Transition probabilities
-transition :: CountMap -> String -> String -> LogProb
-transition word'tag tag tag = 0.1
+transition :: LogProb -> LogProb -> LogProb -> LogProb
+transition a_t' a_ij b_j = 0
 
 
 --M.map (lexical "elephant" word'tag) ((S.elems . M.keysSet) word'tag)
