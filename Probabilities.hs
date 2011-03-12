@@ -105,10 +105,13 @@ main = do
         
         
         --Print the tags that were guessed
-        print $ map snd $ zip test_words . map (pick_most_frequent tag'word) $ test_words
+        --print $ map snd $ zip test_words . map (pick_most_frequent tag'word) $ test_words
+        
+        --Print the probabilities
+        print $ map ( lexical word'tag "director") $ map snd $ zip test_words . map (pick_most_frequent tag'word) $ test_words
         
         --print ( lexical word'tag "director" "NN" )
-        --print $ map ( lexical word'tag "director") 
+        
         hClose handle
         )
 
