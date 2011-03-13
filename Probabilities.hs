@@ -85,27 +85,27 @@ trellisTags trellis=(S.elems . M.keysSet) $ last trellis
 transition :: [Tag] -> LogProb
 transition ngram = -1.2
 
-qNext :: CountMap -> Word -> Trellis -> Tag -> LogProb -> Tag -> LogProb
-qNext word'tag word trellis tagPrev cumProb tagNext =
+qNext :: CountMap -> Word -> Trellis -> Tag -> Tag -> LogProb
+qNext word'tag word trellis tagPrev tagNext =
 	  (last trellis) M.! tagPrev --Previous state
 	+ (transition ngram) --Transition
 	+ (lexical word'tag word tagNext) --Lexical
-	+ cumProb --Running sum of the a's so far
       where ngram = [tagNext]
             --Unigram for now, adjust ngram to allow for higher grams
-{-
+
 --Bigram
-viterbi :: [Word] -> Trellis -> Trellis
-viterbi wordsPrev trellisPrev
-     | trellisPrev == gram = viterbi wordsPrev trellisStart
-     | otherwise           = viterbi wordsNext trellisPrev ++ 
-       M.fold (qNext word trellisPrev) 1 tags
+viterbi :: CountMap -> [Word] -> Trellis -> Trellis
+viterbi word'tag wordsPrev trellisPrev
+     | wordsPrev == []     = trellisPrev
+     | trellisPrev == gram = viterbi word'tag wordsPrev trellisStart
+     | otherwise           = viterbi word'tag wordsNext trellisPrev
+     -- ++  M.fold (qNext word'tag word trellisPrev) 1 tags
        where wordsNext = init wordsPrev
              word = head wordsPrev
              gram = []
              trellisStart= [M.fromList [( "NN", -1.5 ), ("NNP", -2) , ("<s>", -0.1) ]]
              tags=trellisTags trellisPrev
--}
+
 
 --M.map (lexical "elephant" word'tag) ((S.elems . M.keysSet) word'tag)
 --(S.elems . M.keysSet) word'tag
