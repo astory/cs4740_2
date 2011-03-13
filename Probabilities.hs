@@ -84,18 +84,22 @@ transition word'tag tags tag = -1.2
 
 trellis_start=[[( "NN", 0 ), ("NNP", 0) , ("<s>", 0) ]]
 
-viterbi :: [Word] - >Trellis -> Trellis
-viterbi wordsprev trellisprev
-     | trellisprev == [] = viterbi wordsprev trellis_start
-     | otherwise         =
-       where wordsnext = 
-             word =
-     
+--Bigram
+viterbi :: [Word] -> Trellis -> Trellis
+viterbi wordsPrev trellisPrev
+     | trellisPrev == gram = viterbi wordsPrev trellisStart
+     | otherwise           = viterbi wordsNext trellisPrev ++ state
+       where wordsNext = init wordsPrev
+             word = head wordsPrev
+             gram = []
+             trellisStart = []
+             state=[]
+     {-
      (tail trellis) M.! tag --Previous state
    + (transition word'tag tags tag) --Transition
    + (lexical word'tag (head word) tag) --Lexical
---I should be able to put that mess of curried functions into one
--}
+   -}
+
 
 --M.map (lexical "elephant" word'tag) ((S.elems . M.keysSet) word'tag)
 --(S.elems . M.keysSet) word'tag
