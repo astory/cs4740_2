@@ -56,10 +56,6 @@ baseline = do
         putStrLn $ unlines . map show . zip test_words . map (pick_most_frequent tag'word) $ test_words
         hClose handle
         )
-{-
-pick_viterbi :: CountMap -> String -> String
-pick_viterbi map tag =
-  -}
 
 --Log probabilities
 toLog p = (log . fromIntegral) p
@@ -67,8 +63,8 @@ probDiv num denom = toLog  num - toLog denom
 
 --Lexical generation probabilities (emission probabilities) for a particular word|tag
 --Everything else
-lexical :: String -> String -> LogProb
-lexical word tag
+lexical :: CountMap -> String -> String -> LogProb
+lexical word'tag word tag
        --If the tag occurs in the training corpus
       | M.notMember tag word'tag = 0
        --If the word occurs with that tag in the training corpus
@@ -77,33 +73,34 @@ lexical word tag
       | otherwise = (word'tag M.! tag M.! word) `probDiv` (M.fold sum2 0 (word'tag M.! tag)) 
         where sum2 x y = sum [x,y]
 
+trellisTags :: Trellis -> [Tag]
+trellisTags trellis=(S.elems . M.keysSet) $ last trellis
+
 --Ignore ngram for now
-transition :: Tag -> Tag -> LogProb
-transition tagPrev tagNext = -1.2
+transition :: [Tag] -> LogProb
+transition ngram = -1.2
 
+qNext :: CountMap -> Word -> Trellis -> Tag -> LogProb -> Tag -> LogProb
+qNext word'tag word trellis tagPrev cumProb tagNext =
+	  (last trellis) M.! tagPrev --Previous state
+	+ (transition ngram) --Transition
+	+ (lexical word'tag word tagNext) --Lexical
+	+ cumProb --Running sum of the a's so far
+      where ngram = [tagNext]
+            --Unigram for now, adjust ngram to allow for higher grams
 {-
-     (tail trellis) M.! tag --Previous state
-   + (transition word'tag tags tag) --Transition
-   + (lexical word'tag (head word) tag) --Lexical
-   -}
-
-
-aNext :: State -> Tag -> Tag -> LogProb
-aNext aPrev tagPrev tagNext = aPrev + (lexical 
-
-qNext :: State -> Tag -> LogProb
-qNext qPrev tag = M.fold sumProbs "" 0 (aPrev
-
 --Bigram
 viterbi :: [Word] -> Trellis -> Trellis
 viterbi wordsPrev trellisPrev
      | trellisPrev == gram = viterbi wordsPrev trellisStart
-     | otherwise           = viterbi wordsNext trellisPrev ++ []
+     | otherwise           = viterbi wordsNext trellisPrev ++ 
+       M.fold (qNext word trellisPrev) 1 tags
        where wordsNext = init wordsPrev
              word = head wordsPrev
              gram = []
              trellisStart= [M.fromList [( "NN", -1.5 ), ("NNP", -2) , ("<s>", -0.1) ]]
-             tags=(S.elems . M.keysSet) $ last trellisPrev
+             tags=trellisTags trellisPrev
+-}
 
 --M.map (lexical "elephant" word'tag) ((S.elems . M.keysSet) word'tag)
 --(S.elems . M.keysSet) word'tag
