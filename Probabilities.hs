@@ -7,6 +7,9 @@ import qualified Data.Map as M
 import qualified Data.List as L
 
 type CountMap = M.Map String (M.Map String Int)
+type Trellis = [(M.Map String LogProb)]
+type Tag = String
+type Word = String
 type Prob = Float
 type LogProb = Float
 
@@ -75,21 +78,18 @@ lexical word'tag word tag
       -- Otherwise, the probability of the word given the tag
       | otherwise = (word'tag M.! tag M.! word) `probDiv` (M.fold lexDenom 0 (word'tag M.! tag)) 
 
---Transition probabilities
-{-
-transition:: [[LogProb]]
-transition a
+--Ignore ngram for now
+transition :: CountMap -> [Tag] -> Tag -> LogProb
+transition word'tag tags tag = -1.2
 
-  a is a list of times (words in the test set),
-  each time containing a list of path probabilities for each state.
-  
-  (tail a) is a_t-1(i), where i ranges from 1 to N
-  
-  ngrams will give us the transition probabilities a_ij
-  
-  lexical will give us the state observation likelihoods.
-  It may help to define a (b_j o_t) function from lexical
-  for a each particular tag j
+{-
+--w=all words, t=tags until now
+viterbi_state :: CountMap -> [Word] -> [Tag] -> Tag -> Trellis -> LogProb
+viterbi_state word'tag word tags tag trellis =
+     (tail trellis) M.! tag --Previous state
+   + (transition word'tag tags tag) --Transition
+   + (lexical word'tag (head word) tag) --Lexical
+--I should be able to put that mess of curried functions into one
 -}
 
 --M.map (lexical "elephant" word'tag) ((S.elems . M.keysSet) word'tag)
