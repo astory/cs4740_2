@@ -7,11 +7,12 @@ import qualified Data.Map as M
 import qualified Data.List as L
 
 type CountMap = M.Map String (M.Map String Int)
-type Trellis = [(M.Map String LogProb)]
+type State = M.Map String LogProb
+type Trellis = [State]
 type Tag = String
 type Word = String
-type Prob = Float
-type LogProb = Float
+type Prob = Double
+type LogProb = Double
 
 
 {-convert lists of sentences to dictionaries which can give counts of words
@@ -65,40 +66,44 @@ toLog p = (log . fromIntegral) p
 probDiv num denom = toLog  num - toLog denom
 
 --Lexical generation probabilities (emission probabilities) for a particular word|tag
---Denominator
-lexDenom counts sum = sum + counts
-
 --Everything else
-lexical :: CountMap -> String -> String -> LogProb
-lexical word'tag word tag
+lexical :: String -> String -> LogProb
+lexical word tag
        --If the tag occurs in the training corpus
       | M.notMember tag word'tag = 0
        --If the word occurs with that tag in the training corpus
       | M.notMember word (word'tag M.! tag) = 0
       -- Otherwise, the probability of the word given the tag
-      | otherwise = (word'tag M.! tag M.! word) `probDiv` (M.fold lexDenom 0 (word'tag M.! tag)) 
+      | otherwise = (word'tag M.! tag M.! word) `probDiv` (M.fold sum2 0 (word'tag M.! tag)) 
+        where sum2 x y = sum [x,y]
 
 --Ignore ngram for now
-transition :: CountMap -> [Tag] -> Tag -> LogProb
-transition word'tag tags tag = -1.2
+transition :: Tag -> Tag -> LogProb
+transition tagPrev tagNext = -1.2
 
---Bigram
-viterbi :: [Word] -> Trellis -> Trellis
-viterbi wordsPrev trellisPrev
-     | trellisPrev == gram = viterbi wordsPrev trellisStart
-     | otherwise           = viterbi wordsNext trellisPrev ++ state
-       where wordsNext = init wordsPrev
-             word = head wordsPrev
-             gram = []
-             trellisStart= fromList [( "NN", -1.5 ), ("NNP", -2) , ("<s>", -0.1) ]
-             state=[]
-             tags=(S.elems . M.keysSet) $ tail trellisPrev
-     {-
+{-
      (tail trellis) M.! tag --Previous state
    + (transition word'tag tags tag) --Transition
    + (lexical word'tag (head word) tag) --Lexical
    -}
 
+
+aNext :: State -> Tag -> Tag -> LogProb
+aNext aPrev tagPrev tagNext = aPrev + (lexical 
+
+qNext :: State -> Tag -> LogProb
+qNext qPrev tag = M.fold sumProbs "" 0 (aPrev
+
+--Bigram
+viterbi :: [Word] -> Trellis -> Trellis
+viterbi wordsPrev trellisPrev
+     | trellisPrev == gram = viterbi wordsPrev trellisStart
+     | otherwise           = viterbi wordsNext trellisPrev ++ []
+       where wordsNext = init wordsPrev
+             word = head wordsPrev
+             gram = []
+             trellisStart= [M.fromList [( "NN", -1.5 ), ("NNP", -2) , ("<s>", -0.1) ]]
+             tags=(S.elems . M.keysSet) $ last trellisPrev
 
 --M.map (lexical "elephant" word'tag) ((S.elems . M.keysSet) word'tag)
 --(S.elems . M.keysSet) word'tag
