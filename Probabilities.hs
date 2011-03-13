@@ -82,8 +82,6 @@ lexical word'tag word tag
 transition :: CountMap -> [Tag] -> Tag -> LogProb
 transition word'tag tags tag = -1.2
 
-trellis_start=[[( "NN", 0 ), ("NNP", 0) , ("<s>", 0) ]]
-
 --Bigram
 viterbi :: [Word] -> Trellis -> Trellis
 viterbi wordsPrev trellisPrev
@@ -92,8 +90,9 @@ viterbi wordsPrev trellisPrev
        where wordsNext = init wordsPrev
              word = head wordsPrev
              gram = []
-             trellisStart = []
+             trellisStart= fromList [( "NN", -1.5 ), ("NNP", -2) , ("<s>", -0.1) ]
              state=[]
+             tags=(S.elems . M.keysSet) $ tail trellisPrev
      {-
      (tail trellis) M.! tag --Previous state
    + (transition word'tag tags tag) --Transition
