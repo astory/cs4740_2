@@ -59,7 +59,12 @@ baseline = do
 
 --Log probabilities
 toLog p = (log . fromIntegral) p
+fromLog p = exp p
 probDiv num denom = toLog  num - toLog denom
+
+probSum :: [LogProb] -> LogProb
+probSum ins = fromLog $ L.foldr sumExp 1 ins
+     where sumExp x y = sum[x,exp y]
 
 --Lexical generation probabilities (emission probabilities) for a particular word|tag
 --Everything else
