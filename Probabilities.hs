@@ -82,10 +82,15 @@ lexical word'tag word tag
 transition :: CountMap -> [Tag] -> Tag -> LogProb
 transition word'tag tags tag = -1.2
 
-{-
---w=all words, t=tags until now
-viterbi_state :: CountMap -> [Word] -> [Tag] -> Tag -> Trellis -> LogProb
-viterbi_state word'tag word tags tag trellis =
+trellis_start=[[( "NN", 0 ), ("NNP", 0) , ("<s>", 0) ]]
+
+viterbi :: [Word] - >Trellis -> Trellis
+viterbi wordsprev trellisprev
+     | trellisprev == [] = viterbi wordsprev trellis_start
+     | otherwise         =
+       where wordsnext = 
+             word =
+     
      (tail trellis) M.! tag --Previous state
    + (transition word'tag tags tag) --Transition
    + (lexical word'tag (head word) tag) --Lexical
