@@ -1,25 +1,25 @@
-module Ngram
-( Kgram
-, ngrams
-, unigram
-, bigram
-, trigram
-, split_tags
-, sentences
-) where
+--module Ngram
+--( Kgram
+--, ngrams
+--, unigram
+--, bigram
+--, trigram
+--, split_tags
+--, sentences
+--) where
 
 --Code in this file is from http://nlpwp.org/book/chap-words.xhtml
-import qualified Data.Map
+import qualified Data.Map as M
 import Data.List as L
 import Data.List.Split as S
 import Tagging
-countElem :: (Ord k) => Data.Map.Map k Int -> k -> Data.Map.Map k Int
-countElem m e = case (Data.Map.lookup e m) of
-                  Just v  -> Data.Map.insert e (v + 1) m
-                  Nothing -> Data.Map.insert e 1 m
+countElem :: (Ord k) => M.Map k Int -> k -> M.Map k Int
+countElem m e = case (M.lookup e m) of
+                  Just v  -> M.insert e (v + 1) m
+                  Nothing -> M.insert e 1 m
 
-freqList :: (Ord k) => [k] -> Data.Map.Map k Int
-freqList = foldl countElem Data.Map.empty
+freqList :: (Ord k) => [k] -> M.Map k Int
+freqList = foldl countElem M.empty
 
 type Kgram a = [a] -> [[a]]
 
@@ -51,7 +51,14 @@ full_ngrams n xs
         -- sentences |all ngrams in     |  just a list of ngrams
         --           |lists per sentence|
         in map (\k->concat . map (ngrams k) $ xs) l
-        
+
+tally :: Ord a => [a] -> M.Map a Int
+tally =
+    foldr (\ ng map -> M.insertWith (+) ng 1 map) M.empty
+
+build_ngram_tally :: Ord a => Int -> [[a]] -> [M.Map [a] Int]
+build_ngram_tally n =
+    map tally . full_ngrams n
 
 isStart :: (String,String) -> Bool
 isStart (t,w) = t == "<s>"
@@ -72,4 +79,4 @@ main = do
     let tagged_words = posTag text
         sentences' = sentences tagged_words
         (tags, words) = split_tags sentences'
-    print $ full_ngrams 2 words
+    print $ build_ngram_tally 1 $ tags `seq` words
