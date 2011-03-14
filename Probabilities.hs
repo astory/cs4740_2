@@ -1,5 +1,5 @@
 import System.IO
-import Ngram
+--import Ngram
 import Tagging
 
 import qualified Data.Set as S
