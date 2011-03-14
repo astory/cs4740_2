@@ -1,6 +1,5 @@
 #!/bin/bash
-files=$2 #Input
-csv=$1   #Output
+files="$1" #Input
 
-echo trial,score >> $csv
-sed -n -e 's/^score//p' -e s/^filename//p $files|tac|perl -pi -e 'tr/[\012\015]/e/d'|sed 's/%/\n/g'|sed -e s/^\ *//g|sed s/\ \ */,/ >> $csv
+echo id,score 
+sed -n -e 's/\.pos//' -e 's/^score//p' -e s/^filename//p $files|tac|perl -pi -e 'tr/[\012\015]/e/d'|sed 's/%/\n/g'|sed -e s/^\ *//g|sed s/\ \ */,/ 

@@ -39,4 +39,6 @@ Save the emails with the submission results in plain text
 as separate files (.eml) or as one file (.mbox), and run
 the following command to put them in a convenient format
 
-`$ ./tabulate_predictions.sh results/results.csv <emails>`
+`$ ./tabulate_predictions.sh <emails> > results/results.csv`
+
+The email file(s) may not contain spaces.
