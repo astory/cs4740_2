@@ -13,13 +13,6 @@ import qualified Data.Map as M
 import Data.List as L
 import Data.List.Split as S
 import Tagging
-countElem :: (Ord k) => M.Map k Int -> k -> M.Map k Int
-countElem m e = case (M.lookup e m) of
-                  Just v  -> M.insert e (v + 1) m
-                  Nothing -> M.insert e 1 m
-
-freqList :: (Ord k) => [k] -> M.Map k Int
-freqList = foldl countElem M.empty
 
 type Kgram a = [a] -> [[a]]
 
@@ -73,6 +66,8 @@ sentences =
     sentences of tags, words -}
 split_tags :: [[(a,b)]] -> ([[a]], [[b]])
 split_tags = unzip . map unzip
+
+
 
 main = do
     text <- getContents
