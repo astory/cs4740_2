@@ -1,5 +1,5 @@
 import System.IO
---import Ngram
+import Ngram
 import Tagging
 
 import qualified Data.Set as S
@@ -31,7 +31,7 @@ val'key = L.foldl' (\ map sent -> L.foldl' add_pair_to_map map sent) M.empty
 default_tag = "NNP"
 
 swap (a,b) = (b,a)
-second = \ (_,a) (_,b) -> a `compare` b
+second = \ (_,a) (_,b) -> b `compare` a -- for sorting descending
 
 pick_most_frequent :: CountMap -> String -> String
 pick_most_frequent map tag =
@@ -87,9 +87,9 @@ transition ngram = -1.2
 
 qNext :: CountMap -> Word -> Trellis -> Tag -> Tag -> LogProb
 qNext word'tag word trellis tagPrev tagNext =
-	  (last trellis) M.! tagPrev --Previous state
-	+ (transition ngram) --Transition
-	+ (lexical word'tag word tagNext) --Lexical
+      (last trellis) M.! tagPrev --Previous state
+    + (transition ngram) --Transition
+    + (lexical word'tag word tagNext) --Lexical
       where ngram = [tagNext]
             --Unigram for now, adjust ngram to allow for higher grams
 
@@ -128,7 +128,7 @@ main' = do
 
 main = do
     training <- getContents
-    withFile "pos_corpora/test-obs_short.pos" ReadMode (\handle -> do 
+    withFile "pos_corpora/test-obs.pos" ReadMode (\handle -> do 
         test <- hGetContents handle
         let tagged_words = posTag training
             sents = sentences tagged_words
@@ -142,11 +142,12 @@ main = do
 
         --Print just the tags that were guessed
         --print $ map snd $ zip test_words . map (pick_most_frequent tag'word) $ test_words
+            l = case M.lookup "'s" tag'word of
+                Nothing -> M.empty
+                Just map -> map
         
-        --Print the emission probabilities
-        print $ map ( lexical word'tag "director") $ map snd $ zip test_words . map (pick_most_frequent tag'word) $ test_words
+        putStrLn $ unlines . map show . zip test_words . map (pick_most_frequent tag'word) $ test_words
         
-        --print ( lexical word'tag "director" "NN" )
         hClose handle
         )
 

@@ -1,12 +1,12 @@
---module Ngram
---( Kgram
---, ngrams
---, unigram
---, bigram
---, trigram
---, split_tags
---, sentences
---) where
+module Ngram
+( Kgram
+, ngrams
+, unigram
+, bigram
+, trigram
+, split_tags
+, sentences
+) where
 
 --Code in this file is from http://nlpwp.org/book/chap-words.xhtml
 import qualified Data.Map as M
