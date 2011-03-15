@@ -8,7 +8,6 @@ module Ngram
 , sentences
 ) where
 
---Code in this file is from http://nlpwp.org/book/chap-words.xhtml
 import qualified Data.Map as M
 import Data.List as L
 import Data.List.Split as S
@@ -67,11 +66,13 @@ sentences =
 split_tags :: [[(a,b)]] -> ([[a]], [[b]])
 split_tags = unzip . map unzip
 
-
+smoothAddOne :: [M.Map [a] Int] -> [M.Map [a] Int]
+smoothAddOne unsmoothed = L.map addOne unsmoothed
+    where addOne unsmoothed_k= M.map (+ 1) unsmoothed_k
 
 main = do
     text <- getContents
     let tagged_words = posTag text
         sentences' = sentences tagged_words
         (tags, words) = split_tags sentences'
-    print $ build_ngram_tally 1 $ tags `seq` words
+    print $ last $ smoothAddOne $ build_ngram_tally 4 $ tags `seq` words
