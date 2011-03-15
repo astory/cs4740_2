@@ -66,13 +66,13 @@ sentences =
 split_tags :: [[(a,b)]] -> ([[a]], [[b]])
 split_tags = unzip . map unzip
 
-smoothAddOne :: [M.Map [a] Int] -> [M.Map [a] Int]
-smoothAddOne unsmoothed = L.map addOne unsmoothed
-    where addOne unsmoothed_k= M.map (+ 1) unsmoothed_k
+addOne :: [M.Map [a] Int] -> [M.Map [a] Int]
+addOne unsmoothed = L.map addOne_k unsmoothed
+    where addOne_k unsmoothed_k= M.map (+ 1) unsmoothed_k
 
 main = do
     text <- getContents
     let tagged_words = posTag text
         sentences' = sentences tagged_words
         (tags, words) = split_tags sentences'
-    print $ last $ smoothAddOne $ build_ngram_tally 4 $ tags `seq` words
+    print $ last $ addOne $ build_ngram_tally 4 $ tags `seq` words
