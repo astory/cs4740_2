@@ -6,6 +6,8 @@ module Ngram
 , trigram
 , split_tags
 , sentences
+, single_sentences
+, build_ngram_tally
 ) where
 
 --Code in this file is from http://nlpwp.org/book/chap-words.xhtml
@@ -67,6 +69,11 @@ isStart (t,w) = t == "<s>"
 sentences :: [(String, String)] -> [[(String, String)]]
 sentences =
     let splitter = S.dropInitBlank . S.keepDelimsL $ S.whenElt isStart
+    in S.split splitter
+
+single_sentences :: [String] -> [[String]]
+single_sentences =
+    let splitter = S.dropInitBlank . S.keepDelimsL $ S.whenElt (\s -> s == "<s>")
     in S.split splitter
 
 {- converts a list of sentences with tag,word pairs to a pair of lists of

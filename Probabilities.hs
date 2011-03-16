@@ -1,19 +1,15 @@
 import System.IO
+import System.IO.Unsafe
 import Ngram
 import Tagging
+import Data.Ratio
 
+import qualified Data.MemoCombinators as Memo
 import qualified Data.Set as S
 import qualified Data.Map as M
 import qualified Data.List as L
 
 type CountMap = M.Map String (M.Map String Int)
-type State = M.Map String LogProb
-type Trellis = [State]
-type Tag = String
-type Word = String
-type Prob = Double
-type LogProb = Double
-
 
 {-convert lists of sentences to dictionaries which can give counts of words
 given the tag-}
@@ -42,20 +38,41 @@ pick_most_frequent map tag =
         -- head is unsafe; the way we build the maps guarantees they are not empty
             fst . head . L.sortBy second . M.toList $ tagmap
 
-baseline = do
-    training <- getContents
-    withFile "pos_corpora/test-obs.pos" ReadMode (\handle -> do 
-        test <- hGetContents handle
-        let tagged_words = posTag training
-            sents = sentences tagged_words
-            sents' = map (map swap) sents
-            word'tag = val'key sents
-            tag'word = val'key sents'
+initial_prob :: String -> Rational
+initial_prob "<s>" = 1
+initial_prob _ = 0
 
-            test_words = lines test
-        putStrLn $ unlines . map show . zip test_words . map (pick_most_frequent tag'word) $ test_words
-        hClose handle
-        )
+sum_countmap :: M.Map a Int -> Int
+sum_countmap m =
+    foldr (\ (_, count) acc -> acc + count) 0 (M.toList m)
+
+viterbi :: CountMap -> [M.Map [String] Int] -> [String] -> Rational
+viterbi word'tag taggrams words =
+    let unigrams = head taggrams
+        taglist = L.concat . S.elems $ M.keysSet unigrams
+        w n = words !! (fromInteger n - 1)
+        tag_prob :: String -> String -> Rational
+        tag_prob word tag =
+            case M.lookup tag word'tag of
+                Nothing -> 0 -- unknown tag
+                Just tagmap ->
+                    case M.lookup word tagmap of
+                        Nothing -> 0 -- smoothing here
+                        Just count ->
+                            toInteger(count) % toInteger(sum_countmap tagmap)
+        v :: Integer -> String -> Rational
+        v 1 k = tag_prob (w 1) k * initial_prob k
+        v t k =
+            unsafePerformIO(print (t, k)) `seq`
+            let 
+                measure_tag y = {-transition prob-} v (t-1) y
+                options = map measure_tag taglist
+                best = maximum options
+            in tag_prob (w t) k * best
+        v' = Memo.memo2 Memo.integral (Memo.list Memo.char) v
+        options = map (\y -> v' (toInteger . length $ words) y) taglist
+        best = maximum options :: Rational
+    in best
 
 main = do
     training <- getContents
@@ -67,7 +84,12 @@ main = do
             word'tag = val'key sents
             tag'word = val'key sents'
 
+            (tags, words) = split_tags sents
+            taggrams = build_ngram_tally 1 tags
+
             test_words = lines test
-        putStrLn $ unlines . map show . zip test_words . map (pick_most_frequent tag'word) $ test_words
+            test_sents = (single_sentences test_words)
+        word'tag `seq` taggrams `seq` print "read dataset"
+        print $ viterbi word'tag taggrams (take 2 (head test_sents))
         hClose handle
         )
