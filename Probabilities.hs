@@ -49,6 +49,7 @@ sum_countmap m =
 
 ngram_prob :: Ord a => Show a =>[M.Map [a] Int] -> a -> [a] -> Rational
 ngram_prob ngrams x prefix =
+    --unsafePerformIO(putStrLn(show(prefix ++ [x]) ++ ":" ++ show(numerator% denominator))) `seq`
     if denominator == 0 then
         -- we didn't see the prefix at all, 0 is sensible, to avoid breaking
         0
@@ -62,6 +63,10 @@ ngram_prob ngrams x prefix =
             B.fromMaybe 0 (M.lookup (prefix ++ [x]) whole_map)
         denominator =
             B.fromMaybe 0 (M.lookup (prefix) prefix_map)
+
+readable = map (\(a,b) -> (fromRational a, b))
+
+upsl = unsafePerformIO . putStrLn
 
 viterbi :: CountMap -> [M.Map [String] Int] -> [String] -> (Rational, [String])
 viterbi word'tag taggrams words =
@@ -84,16 +89,20 @@ viterbi word'tag taggrams words =
             where
             v' 1 k = (tag_prob (w 1) k * initial_prob k, [k])
             v' t k =
+                upsl ("v' " ++ show(t) ++ " " ++ k )`seq`
                 let 
                     measure_tag :: String -> (Rational, [String])
                     measure_tag (y) =
                         let (value, ks) = v (t-1) y -- ks ends in y
-                            trans_prob = taggram_prob y (take (fromInteger(n-1)) ks)
-                        in (trans_prob * value, ks)
+                            trans_prob = taggram_prob y (take (fromInteger(n-1)) (init ks))
+                        in 
+                            upsl ("value,ks,trprb,n" ++ show(value, ks, fromRational trans_prob,n)) `seq`
+                            (trans_prob * value, ks)
                     options = map measure_tag taglist :: [(Rational, [String])]
                     (best, ks) = 
                         L.maximumBy (\(a,_) (b,_) -> a `compare` b) options
                 in 
+                    upsl ("options: "++ (show (readable options))) `seq`
                     (tag_prob (w t) k * best, ks ++ [k])
         options = map (\y -> v (toInteger . length $ words) y) taglist
         {- if the test word didn't appear in the training set, you get the last
@@ -114,12 +123,14 @@ main = do
             tag'word = val'key sents'
 
             (tags, words) = split_tags sents
-            taggrams = safe_ngram_tally 1 tags
+            taggrams = safe_ngram_tally 2 tags
 
             test_words = (lines test)
-            test_sents = (single_sentences test_words)
+            test_sents = take 1 (single_sentences test_words)
+            --t = ["<s>", "Kent", "cigarette", "filters"]
+            t = take 3 $ head test_sents
         word'tag `seq` taggrams `seq` print "read dataset"
-        print $ viterbi word'tag taggrams (head test_sents)
-        print $ head test_sents
+        print $ viterbi word'tag taggrams t
+        print $ t
         hClose handle
         )
