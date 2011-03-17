@@ -78,14 +78,16 @@ viterbi observed_words word'tag taggrams gram_counts words =
             case M.lookup tag word'tag of
                 Nothing -> 0 -- unknown tag, shouldn't happen
                 Just tagmap ->
-                    case M.lookup word (tagmap) of -- smoothing for count>0 goes here 
+                    let tagmap'=addOne_k tagmap in 
+                    case M.lookup word tagmap' of -- smoothing for count>0 goes here 
                         Nothing ->
-                            case M.lookup "<UNK>" tagmap of
+                            case M.lookup "<UNK>" tagmap' of
                                 Nothing -> 0 --No unknwonw word for this tag. This is where we smooth count=0
                                 Just count ->
-                                     toInteger(count) % toInteger(sum_countmap tagmap)
+                                    --toInteger(count)  % toInteger(sum_countmap tagmap') --Not smoothed
+                                    ( ( * toInteger(count) ) (toInteger (count_dict tagmap') ) ) % ( toInteger(sum_countmap tagmap') + ( toInteger (count_dict tagmap') ) )
                         Just count ->
-                            toInteger(count) % toInteger(sum_countmap tagmap)
+                                    ( ( * toInteger(count) ) ( toInteger (count_dict tagmap') ) ) % ( toInteger(sum_countmap tagmap') + (toInteger (count_dict tagmap') ) )
         taggram_prob = ngram_prob taggrams
         n = toInteger $ length taggrams - 1
         v :: Integer -> String -> (Rational, [String])

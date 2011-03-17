@@ -10,6 +10,7 @@ module Ngram
 , build_ngram_tally
 , safe_ngram_tally
 , addOne
+, addOne_k
 ) where
 
 import qualified Data.Map as M
@@ -85,7 +86,9 @@ split_tags = unzip . map unzip
 
 addOne :: [M.Map [a] Int] -> [M.Map [a] Int]
 addOne unsmoothed = L.map addOne_k unsmoothed
-    where addOne_k unsmoothed_k= M.map (+ 1) unsmoothed_k
+
+addOne_k :: M.Map [a] Int -> M.Map [a] Int
+addOne_k unsmoothed_k= M.map (+ 1) unsmoothed_k
 
 main = do
     text <- getContents
