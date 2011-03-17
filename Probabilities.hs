@@ -46,8 +46,8 @@ initial_prob _ = 0
 sum_countmap :: Ord a => Num b => M.Map a b -> b 
 sum_countmap m = foldr (\ (_, count) acc -> acc + count) 0 (M.toList m)
 
-ngram_prob :: Ord a =>[M.Map [a] Int] -> a -> [a] -> Rational
-ngram_prob ngrams x prefix =
+ngram_prob :: Ord a => Bool -> [Int] -> [M.Map [a] Int] -> a -> [a] -> Rational
+ngram_prob smooth gram_counts ngrams x prefix =
     -- we didn't see the prefix at all, 0 is sensible, to avoid breaking
     if denominator == 0 then
         0
@@ -58,9 +58,15 @@ ngram_prob ngrams x prefix =
         whole_map = ngrams !! (len + 1)
         prefix_map = ngrams !! len
         numerator = 
-            B.fromMaybe 0 (M.lookup (prefix ++ [x]) whole_map)
+            let count = B.fromMaybe 0 (M.lookup (prefix ++ [x]) whole_map) in
+            if smooth then
+                count + 1
+            else count
         denominator =
-            B.fromMaybe 0 (M.lookup (prefix) prefix_map)
+            let count = B.fromMaybe 0 (M.lookup (prefix) prefix_map) in
+            if smooth then
+                count + gram_counts !! (len + 1)
+            else count
 
 tag_map_sum :: Ord a => Ord b => Num c => M.Map a (M.Map b c) -> a -> c
 tag_map_sum map tag =
@@ -93,14 +99,14 @@ readable = map (\(a,b) -> (fromRational a, b))
 
 upsl = unsafePerformIO . putStrLn
 
-viterbi :: Bool -> S.Set String -> CountMap -> [M.Map [String] Int] -> [Int] -> [String] -> (Rational, [String])
-viterbi unk observed_words word'tag taggrams gram_counts words =
+viterbi :: Bool -> Bool -> S.Set String -> CountMap -> [M.Map [String] Int] -> [Int] -> [String] -> (Rational, [String])
+viterbi unk smooth observed_words word'tag taggrams gram_counts words =
     let unigrams = taggrams !! 1
         taglist = L.concat . S.elems $ M.keysSet unigrams
         tag_sum = (Memo.list Memo.char) (tag_map_sum word'tag)
         w n = words !! (fromInteger n - 1)
         tag_prob = tag_probability unk observed_words tag_sum word'tag
-        taggram_prob = ngram_prob taggrams
+        taggram_prob = ngram_prob smooth gram_counts taggrams
         n = toInteger $ length taggrams - 1
         v :: Integer -> String -> (Rational, [String])
         v = Memo.memo2 Memo.integral (Memo.list Memo.char) v'
@@ -139,6 +145,7 @@ main = do
     withFile "pos_corpora/test-obs_short.pos" ReadMode (\handle -> do 
         test <- hGetContents handle
         let unk = False 
+            smooth = True
             tagged_words = (if unk then unktags else (\x->x)) $ posTag training
             sents = sentences tagged_words
             sents' = map (map swap) sents
@@ -154,7 +161,7 @@ main = do
             test_sents = take 1 (single_sentences test_words)
             t = head test_sents
         word'tag `seq` taggrams `seq` print "read dataset"
-        print $ viterbi unk observed_words word'tag taggrams gram_counts t
+        print $ viterbi unk smooth observed_words word'tag taggrams gram_counts t
         print $ t
         hClose handle
         )
