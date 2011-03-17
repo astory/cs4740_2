@@ -68,18 +68,24 @@ tag_map_sum map tag =
         Nothing -> 0
         Just tagmap -> sum_countmap tagmap
 
-tag_probability :: S.Set String -> (String -> Int) -> CountMap -> String -> String -> Rational
-tag_probability observed_words tag_sum word'tag word tag =
+tag_probability :: Bool -> S.Set String -> (String -> Int) -> CountMap -> String -> String -> Rational
+tag_probability unk observed_words tag_sum word'tag word tag =
     case M.lookup tag word'tag of
         Nothing -> 0 -- unknown tag, shouldn't happen
         Just tagmap ->
             case M.lookup word tagmap of
                 Nothing ->
-                    -- We didn't find any instances of <tag, word>
-                    if S.notMember word observed_words && tag == "NNP" then
-                        1
+                    if unk then
+                        case M.lookup "<UNK>" tagmap of
+                            Nothing -> 0
+                            Just count ->
+                                toInteger(count) % toInteger(tag_sum tag)
                     else
-                        0
+                        -- We didn't find any instances of <tag, word>
+                        if S.notMember word observed_words && tag == "NNP" then
+                            1
+                        else
+                            0
                 Just count ->
                     toInteger(count) % toInteger(tag_sum tag)
 
@@ -87,13 +93,13 @@ readable = map (\(a,b) -> (fromRational a, b))
 
 upsl = unsafePerformIO . putStrLn
 
-viterbi :: S.Set String -> CountMap -> [M.Map [String] Int] -> [Int] -> [String] -> (Rational, [String])
-viterbi observed_words word'tag taggrams gram_counts words =
+viterbi :: Bool -> S.Set String -> CountMap -> [M.Map [String] Int] -> [Int] -> [String] -> (Rational, [String])
+viterbi unk observed_words word'tag taggrams gram_counts words =
     let unigrams = taggrams !! 1
         taglist = L.concat . S.elems $ M.keysSet unigrams
         tag_sum = (Memo.list Memo.char) (tag_map_sum word'tag)
         w n = words !! (fromInteger n - 1)
-        tag_prob = tag_probability observed_words tag_sum word'tag
+        tag_prob = tag_probability unk observed_words tag_sum word'tag
         taggram_prob = ngram_prob taggrams
         n = toInteger $ length taggrams - 1
         v :: Integer -> String -> (Rational, [String])
@@ -132,7 +138,8 @@ main = do
     training <- getContents
     withFile "pos_corpora/test-obs_short.pos" ReadMode (\handle -> do 
         test <- hGetContents handle
-        let tagged_words = unktags $ posTag training
+        let unk = False 
+            tagged_words = (if unk then unktags else (\x->x)) $ posTag training
             sents = sentences tagged_words
             sents' = map (map swap) sents
             word'tag = val'key sents
@@ -147,7 +154,7 @@ main = do
             test_sents = take 1 (single_sentences test_words)
             t = head test_sents
         word'tag `seq` taggrams `seq` print "read dataset"
-        print $ viterbi observed_words word'tag taggrams gram_counts t
+        print $ viterbi unk observed_words word'tag taggrams gram_counts t
         print $ t
         hClose handle
         )
