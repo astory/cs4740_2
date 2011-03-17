@@ -42,3 +42,11 @@ the following command to put them in a convenient format
 `$ ./tabulate_predictions.sh <emails> > results/results.csv`
 
 The email file(s) may not contain spaces.
+
+Data analysis
+================
+
+In order to ease the analysis, name the result .pos files
+according to the identifiers in the experiment_design.R file.
+
+Running plot_results.R will produce nice plots
