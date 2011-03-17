@@ -1,0 +1,112 @@
+\documentclass{article}
+\usepackage{booktabs}
+%By 11:59pm, Thursday, March 10th, you need to submit:
+%1. A short document that indicates your plan for the project
+\newcommand{\osn}{\oldstylenums}
+\title{Sequence Tagging: Part One}
+\author{Thomas Levine and Alec Story\\\small{tkl\osn{22} \& avs\osn{38}}}
+\begin{document}
+\maketitle
+
+%1. The Sequence Tagging Approach. Make clear which sequence
+%tagging method(s) that you selected. Make clear which parts were im-
+%plemented from scratch vs. obtained via an existing package. Explain
+%and motivate any preprocessing and design choices.
+\section{The Sequence Tagging Approach}
+
+
+%which data set(s) and algorithm(s) will you include? will you implement the
+\subsection{Data set}
+We will study part-of-speech tagging.
+\subsection{Algorithms}
+We plan to implement all of our tools from scratch or nearly-scratch in Haskell,
+a modern functional programming language with monadic I/O.  We have already
+implemented a system to read the input files and produce a usable dictionary of
+arbitrary n-grams (over arbitrary objects, in our case, we will use tags), and
+can produce probabilities for any pair of arbitrary objects taken from a list
+(in our case, words and tags).  These components yield all the data we need to
+compute the Viterbi algorithm.  Our implementation of Viterbi will \emph{not} be
+the traditional table-based implementation; rather, it will use memoization
+because such an approach is more natural for a functional programming language
+like Haskell.
+
+
+
+%2. Experiments. Motivate and describe the experiments that you ran.
+%What were your hupotheses as to what would happen?
+\section{Experiments}
+
+
+\begin{table}
+\begin{tabular}{lcccc}
+%\toprule
+& \multicolumn{4}{c}{Factors} \\
+\cmidrule{2-5}
+& & \multicolumn{2}{c}{Smoothing} \\
+\cmidrule{3-4}
+       & Training size & $n$-gram length & $n$-gram & Lexical & UNK\\
+\cmidrule{2-5}
+Levels & 100     &  2  & None        & None        & None \\
+       & 1000    &  3  & Add One & Add One & First occurrance  \\
+       & \vdots  &  \vdots  &             &             &      \\
+\cmidrule{2-5}
+%\bottomrule
+\end{tabular}
+\caption{\label{tab:ind_vars}Independent variables for experiments on the final system with a Hidden Markov Model}
+\end{table}
+
+Our experiments will consider several of a variety of variables (table \ref{tab:ind_vars}): n-gram length,
+n-gram smoothing (Good-Turing or none), lexical probability smoothing, unknown
+word handling (counting the first occurrances of words as unknown) and
+whether a hidden Markov model is used (comparison to the baseline).
+We have not yet decided precisely which features we will implement, but we
+aim to target all of them if time allows.
+
+%The document should describe the baseline system, report the baseline
+%predictions for the task, and explain how you got them(e.g. wrote your
+%own code, used a package, used the web-based scorer).
+\section{Baseline system}
+Our baseline system includes n-gram extraction,
+but we do not use it.
+It does not include the hidden Markov model either.
+
+Instead of using Bayes' rule and using n-grams and hidden Markov models,
+the system assumes that a word's part of speech depends only
+on the word and not on its context. With this assumption,
+The system computes probabilities for each tag given the word by counting the
+number of times each (tag, word) pair appears, and for each word, emitting the
+most likely tag.
+
+Unknown words are tagged as proper noun.
+The baseline system does not do any smoothing.
+
+The predictions from the baseline system had a score of 47.83\%
+from the prediction submission form.
+
+%3. The code for the baseline system if you are implementing from
+%scratch. If you are using a package, do not submit the code.
+
+\section{The Code}
+
+We recognize that Haskell is a language that may not be installed on your
+machine.  Instructions for running our code with (and without!) Haskell
+installed are included in our \verb+Readme+.
+
+%3. Results. Summarize the performance of your system on both the
+%training and test data. Minimally, you should compare your results
+%to the baseline. Please put the results into clearly labeled tables or
+%diagrams and include a written summary of the results.
+\section{Results}
+
+
+%4. Discussion of the results. This section should include any observa-
+%tions regarding your system’s performance — e.g. When did it work
+%well, when did it fail, why? How might you improve the system?
+%Additional analysis is always good. You can do an error analysis —
+%what sorts of errors occurred, and why? You can provide a learning
+%curve — how does your model’s performance change with the amount
+%of training data provided. You can come up with a better baseline and
+%compare your systems against that.
+\section{Discussion}
+
+\end{document}
