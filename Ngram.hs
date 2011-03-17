@@ -8,6 +8,7 @@ module Ngram
 , sentences
 , single_sentences
 , build_ngram_tally
+, safe_ngram_tally
 ) where
 
 --Code in this file is from http://nlpwp.org/book/chap-words.xhtml
@@ -61,6 +62,14 @@ tally =
 build_ngram_tally :: Ord a => Int -> [[a]] -> [M.Map [a] Int]
 build_ngram_tally n =
     map tally . full_ngrams n
+
+safe_ngram_tally :: Ord a => Int -> [[a]] -> [M.Map [a] Int]
+safe_ngram_tally n as
+    | n < 0 = []
+    | otherwise =
+        (M.singleton [] (length (concat as))) : maps
+    where
+        maps = build_ngram_tally n as
 
 isStart :: (String,String) -> Bool
 isStart (t,w) = t == "<s>"
