@@ -6,6 +6,9 @@ module Ngram
 , trigram
 , split_tags
 , sentences
+, single_sentences
+, build_ngram_tally
+, safe_ngram_tally
 ) where
 
 import qualified Data.Map as M
@@ -52,6 +55,14 @@ build_ngram_tally :: Ord a => Int -> [[a]] -> [M.Map [a] Int]
 build_ngram_tally n =
     map tally . full_ngrams n
 
+safe_ngram_tally :: Ord a => Int -> [[a]] -> [M.Map [a] Int]
+safe_ngram_tally n as
+    | n < 0 = []
+    | otherwise =
+        (M.singleton [] (length (concat as))) : maps
+    where
+        maps = build_ngram_tally n as
+
 isStart :: (String,String) -> Bool
 isStart (t,w) = t == "<s>"
 
@@ -59,6 +70,11 @@ isStart (t,w) = t == "<s>"
 sentences :: [(String, String)] -> [[(String, String)]]
 sentences =
     let splitter = S.dropInitBlank . S.keepDelimsL $ S.whenElt isStart
+    in S.split splitter
+
+single_sentences :: [String] -> [[String]]
+single_sentences =
+    let splitter = S.dropInitBlank . S.keepDelimsL $ S.whenElt (\s -> s == "<s>")
     in S.split splitter
 
 {- converts a list of sentences with tag,word pairs to a pair of lists of

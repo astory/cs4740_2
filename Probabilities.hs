@@ -1,19 +1,16 @@
-import System.IO
+import Data.Ratio
 import Ngram
+import System.IO
+import System.IO.Unsafe
 import Tagging
 
-import qualified Data.Set as S
-import qualified Data.Map as M
 import qualified Data.List as L
+import qualified Data.Map as M
+import qualified Data.Maybe as B
+import qualified Data.MemoCombinators as Memo
+import qualified Data.Set as S
 
 type CountMap = M.Map String (M.Map String Int)
-type State = M.Map String LogProb
-type Trellis = [State]
-type Tag = String
-type Word = String
-type Prob = Double
-type LogProb = Double
-
 
 {-convert lists of sentences to dictionaries which can give counts of words
 given the tag-}
@@ -42,93 +39,73 @@ pick_most_frequent map tag =
         -- head is unsafe; the way we build the maps guarantees they are not empty
             fst . head . L.sortBy second . M.toList $ tagmap
 
-baseline = do
-    training <- getContents
-    withFile "pos_corpora/test-obs.pos" ReadMode (\handle -> do 
-        test <- hGetContents handle
-        let tagged_words = posTag training
-            sents = sentences tagged_words
-            sents' = map (map swap) sents
-            word'tag = val'key sents
-            tag'word = val'key sents'
+initial_prob :: String -> Rational
+initial_prob "<s>" = 1
+initial_prob _ = 0
 
-            test_words = lines test
-        putStrLn $ unlines . map show . zip test_words . map (pick_most_frequent tag'word) $ test_words
-        hClose handle
-        )
+sum_countmap :: M.Map a Int -> Int
+sum_countmap m =
+    foldr (\ (_, count) acc -> acc + count) 0 (M.toList m)
 
---Log probabilities
-toLog p = (log . fromIntegral) p
-fromLog p = exp p
-probDiv num denom = toLog  num - toLog denom
+ngram_prob :: Ord a => Show a =>[M.Map [a] Int] -> a -> [a] -> Rational
+ngram_prob ngrams x prefix =
+    if denominator == 0 then
+        -- we didn't see the prefix at all, 0 is sensible, to avoid breaking
+        0
+    else
+        (toInteger numerator) % (toInteger denominator)
+    where
+        len = length prefix
+        whole_map = ngrams !! (len + 1)
+        prefix_map = ngrams !! len
+        numerator = 
+            B.fromMaybe 0 (M.lookup (prefix ++ [x]) whole_map)
+        denominator =
+            B.fromMaybe 0 (M.lookup (prefix) prefix_map)
 
-probSum :: [LogProb] -> LogProb
-probSum ins = fromLog $ L.foldr sumExp 1 ins
-     where sumExp x y = sum[x,exp y]
-
---Lexical generation probabilities (emission probabilities) for a particular word|tag
---Everything else
-lexical :: CountMap -> String -> String -> LogProb
-lexical word'tag word tag
-       --If the tag occurs in the training corpus
-      | M.notMember tag word'tag = 0
-       --If the word occurs with that tag in the training corpus
-      | M.notMember word (word'tag M.! tag) = 0
-      -- Otherwise, the probability of the word given the tag
-      | otherwise = (word'tag M.! tag M.! word) `probDiv` (M.fold sum2 0 (word'tag M.! tag)) 
-        where sum2 x y = sum [x,y]
-
-trellisTags :: Trellis -> [Tag]
-trellisTags trellis=(S.elems . M.keysSet) $ last trellis
-
---Ignore ngram for now
-transition :: [Tag] -> LogProb
-transition ngram = -1.2
-
-qNext :: CountMap -> Word -> Trellis -> Tag -> Tag -> LogProb
-qNext word'tag word trellis tagPrev tagNext =
-      (last trellis) M.! tagPrev --Previous state
-    + (transition ngram) --Transition
-    + (lexical word'tag word tagNext) --Lexical
-      where ngram = [tagNext]
-            --Unigram for now, adjust ngram to allow for higher grams
-
---Bigram
-viterbi :: CountMap -> [Word] -> Trellis -> Trellis
-viterbi word'tag wordsPrev trellisPrev
-     | wordsPrev == []     = trellisPrev
-     | trellisPrev == gram = viterbi word'tag wordsPrev trellisStart
-     | otherwise           = viterbi word'tag wordsNext trellisPrev
-     -- ++  M.fold (qNext word'tag word trellisPrev) 1 tags
-       where wordsNext = init wordsPrev
-             word = head wordsPrev
-             gram = []
-             trellisStart= [M.fromList [( "NN", -1.5 ), ("NNP", -2) , ("<s>", -0.1) ]]
-             tags=trellisTags trellisPrev
-
-
---M.map (lexical "elephant" word'tag) ((S.elems . M.keysSet) word'tag)
---(S.elems . M.keysSet) word'tag
---let word'tag = (val'key . sentences) [("<s>","<s>"),("NN","director"),("NN","elephant")]
-
-main' = do
-    training <- getContents
-    withFile "pos_corpora/test-obs.pos" ReadMode (\handle -> do 
-        test <- hGetContents handle
-        let tagged_words = posTag training
-            sents = sentences tagged_words
-            sents' = map (map swap) sents
-            word'tag = val'key sents
-            tag'word = val'key sents'
-
-            test_words = lines test
-        putStrLn $ unlines . map show . zip test_words . map (pick_most_frequent tag'word) $ test_words
-        hClose handle
-        )
+viterbi :: CountMap -> [M.Map [String] Int] -> [String] -> (Rational, [String])
+viterbi word'tag taggrams words =
+    let unigrams = taggrams !! 1
+        taglist = L.concat . S.elems $ M.keysSet unigrams
+        w n = words !! (fromInteger n - 1)
+        tag_prob :: String -> String -> Rational
+        tag_prob word tag =
+            case M.lookup tag word'tag of
+                Nothing -> 0 -- unknown tag, shouldn't happen
+                Just tagmap ->
+                    case M.lookup word tagmap of
+                        Nothing -> 1 % 1000 -- smoothing here
+                        Just count ->
+                            toInteger(count) % toInteger(sum_countmap tagmap)
+        taggram_prob = ngram_prob taggrams
+        n = toInteger $ length taggrams - 1
+        v :: Integer -> String -> (Rational, [String])
+        v = Memo.memo2 Memo.integral (Memo.list Memo.char) v'
+            where
+            v' 1 k = (tag_prob (w 1) k * initial_prob k, [k])
+            v' t k =
+                let 
+                    measure_tag :: String -> (Rational, [String])
+                    measure_tag (y) =
+                        let (value, ks) = v (t-1) y -- ks ends in y
+                            trans_prob = taggram_prob y (take (fromInteger(n-1)) ks)
+                        in (trans_prob * value, ks)
+                    options = map measure_tag taglist :: [(Rational, [String])]
+                    (best, ks) = 
+                        L.maximumBy (\(a,_) (b,_) -> a `compare` b) options
+                in 
+                    (tag_prob (w t) k * best, ks ++ [k])
+        options = map (\y -> v (toInteger . length $ words) y) taglist
+        {- if the test word didn't appear in the training set, you get the last
+        one in the list because we don't have smoothing, also, this should
+        probably be a special case -}
+        (best, ks) = L.maximumBy (\(a,_) (b,_) -> a `compare` b) options
+    in 
+        (best, ks)
 
 main = do
     training <- getContents
-    withFile "pos_corpora/test-obs.pos" ReadMode (\handle -> do 
+    withFile "pos_corpora/test-obs_short.pos" ReadMode (\handle -> do 
         test <- hGetContents handle
         let tagged_words = posTag training
             sents = sentences tagged_words
@@ -136,20 +113,13 @@ main = do
             word'tag = val'key sents
             tag'word = val'key sents'
 
-            test_words = lines test
-        --Print the predictions
-        --putStrLn $ unlines . (map show) . zip test_words . map (pick_most_frequent tag'word) $ test_words
+            (tags, words) = split_tags sents
+            taggrams = safe_ngram_tally 1 tags
 
-        --Print just the tags that were guessed
-        --print $ map snd $ zip test_words . map (pick_most_frequent tag'word) $ test_words
-            l = case M.lookup "'s" tag'word of
-                Nothing -> M.empty
-                Just map -> map
-        
-        putStrLn $ unlines . map show . zip test_words . map (pick_most_frequent tag'word) $ test_words
-        
+            test_words = (lines test)
+            test_sents = (single_sentences test_words)
+        word'tag `seq` taggrams `seq` print "read dataset"
+        print $ viterbi word'tag taggrams (head test_sents)
+        print $ head test_sents
         hClose handle
         )
-
-
-
