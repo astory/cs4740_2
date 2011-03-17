@@ -68,8 +68,8 @@ readable = map (\(a,b) -> (fromRational a, b))
 
 upsl = unsafePerformIO . putStrLn
 
-viterbi :: CountMap -> [M.Map [String] Int] -> [String] -> (Rational, [String])
-viterbi word'tag taggrams words =
+viterbi :: S.Set String -> CountMap -> [M.Map [String] Int] -> [String] -> (Rational, [String])
+viterbi observed_words word'tag taggrams words =
     let unigrams = taggrams !! 1
         taglist = L.concat . S.elems $ M.keysSet unigrams
         w n = words !! (fromInteger n - 1)
@@ -79,7 +79,7 @@ viterbi word'tag taggrams words =
                 Nothing -> 0 -- unknown tag, shouldn't happen
                 Just tagmap ->
                     case M.lookup word tagmap of
-                        Nothing -> 1 % 1000 -- smoothing here
+                        Nothing -> 1 % 100000000 -- smoothing here
                         Just count ->
                             toInteger(count) % toInteger(sum_countmap tagmap)
         taggram_prob = ngram_prob taggrams
@@ -96,14 +96,20 @@ viterbi word'tag taggrams words =
                         let (value, ks) = v (t-1) y -- ks ends in y
                             trans_prob = taggram_prob y (take (fromInteger(n-1)) (init ks))
                         in 
-                            upsl ("value,ks,trprb,n" ++ show(value, ks, fromRational trans_prob,n)) `seq`
+                            --upsl ("value,ks,trprb,n" ++ show(value, ks, fromRational trans_prob,n)) `seq`
                             (trans_prob * value, ks)
                     options = map measure_tag taglist :: [(Rational, [String])]
                     (best, ks) = 
                         L.maximumBy (\(a,_) (b,_) -> a `compare` b) options
+                    lex_prob = if S.member (w t) observed_words then
+                            --upsl ("we have seen " ++ (w t)) `seq`
+                            tag_prob (w t) k
+                        else
+                            --upsl ("unseen" ++ (w t)) `seq`
+                            if k == "NNP" then 1 else 0
                 in 
-                    upsl ("options: "++ (show (readable options))) `seq`
-                    (tag_prob (w t) k * best, ks ++ [k])
+                    --upsl ("options: "++ (show (readable options))) `seq`
+                    (lex_prob * best, ks ++ [k])
         options = map (\y -> v (toInteger . length $ words) y) taglist
         {- if the test word didn't appear in the training set, you get the last
         one in the list because we don't have smoothing, also, this should
@@ -124,13 +130,14 @@ main = do
 
             (tags, words) = split_tags sents
             taggrams = safe_ngram_tally 2 tags
+            observed_words = S.fromList (concat words)
 
             test_words = (lines test)
             test_sents = take 1 (single_sentences test_words)
             --t = ["<s>", "Kent", "cigarette", "filters"]
-            t = take 3 $ head test_sents
+            t = head test_sents
         word'tag `seq` taggrams `seq` print "read dataset"
-        print $ viterbi word'tag taggrams t
+        print $ viterbi observed_words word'tag taggrams t
         print $ t
         hClose handle
         )
