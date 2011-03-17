@@ -5,7 +5,7 @@ results=merge(design,scores,by='file')
 
 startplot=function(){
 	plot(score~n,results,type='n',axes=F,
-		xlab='N-gram length',ylab='Score',
+		xlab='N-gram length',ylab='Score (% correct)',
 		main='Performance of the part-of-speech tagger'
 	)
 	axis(1,at=min(results$n):max(results$n))
