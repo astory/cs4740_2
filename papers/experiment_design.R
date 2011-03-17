@@ -1,12 +1,15 @@
 library(AlgDesign)
 
-treatments=gen.factorial(c(4,2,2,2), nVars=4,varNames=c('n','smooth.gram','smooth.lex','unk'),factors=2:4,center=F)
+lineCounts=c(100,1000,10000,996759)
+treatments=gen.factorial(c(4,2,2,2,length(lineCounts)), nVars=5,varNames=c('n','smooth.gram','smooth.lex','unk','log.train.line'),factors=2:5,center=F)
 treatments$n=treatments$n+1
-levels(treatments$smooth.gram)=c('None','GoodTuring')
-levels(treatments$smooth.lex)=c('None','GoodTuring')
-levels(treatments$unk)=c('None','FirstOccurrence')
-treatments$score='?'
-treatments$time='?'
+levels(treatments$smooth.gram)=c('None','Add One')
+levels(treatments$smooth.lex)=c('None','Add One')
+levels(treatments$unk)=c('None','First Occurrence')
+levels(treatments$log.train.line)=log(lineCounts)
+treatments$log.train.line=as.numeric(as.character(treatments$log.train.line))
+#treatments$score='?'
+#treatments$time='?'
 
 #If we do look at time, particularly if we do it very naively,
 #like by running bash date right before and right after
@@ -25,7 +28,7 @@ row.names(treatments.rand)=sort(id)
 #we don't really need to randomize. I'd suggest against it
 #because it could be confusing.
 
-treatments$time=NULL
+#treatments$time=NULL
 
 #Also run the baseline, but I think it'll be less confusing
 #if it's not in the same frames. Hmm well
