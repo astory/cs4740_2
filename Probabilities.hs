@@ -99,43 +99,45 @@ readable = map (\(a,b) -> (fromRational a, b))
 
 upsl = unsafePerformIO . putStrLn
 
-viterbi :: Bool -> Bool -> S.Set String -> CountMap -> [M.Map [String] Int] -> [Int] -> [String] -> (Rational, [String])
-viterbi unk smooth observed_words word'tag taggrams gram_counts words =
-    let unigrams = taggrams !! 1
+viterbi :: Bool -> Bool ->
+        S.Set String -> CountMap -> [M.Map [String] Int] -> [Int] ->
+        [[String]] ->
+        [(Rational, [String])]
+viterbi unk smooth
+        observed_words word'tag taggrams gram_counts
+        all_words =
+    map v_sentence all_words where
+        unigrams = taggrams !! 1
         taglist = L.concat . S.elems $ M.keysSet unigrams
         tag_sum = (Memo.list Memo.char) (tag_map_sum word'tag)
-        w n = words !! (fromInteger n - 1)
         tag_prob = tag_probability unk observed_words tag_sum word'tag
         taggram_prob = ngram_prob smooth gram_counts taggrams
         n = toInteger $ length taggrams - 1
-        v :: Integer -> String -> (Rational, [String])
-        v = Memo.memo2 Memo.integral (Memo.list Memo.char) v'
-            where
-            v' 1 k = (tag_prob (w 1) k * initial_prob k, [k])
-            v' t k =
-                upsl ("v' " ++ show(t) ++ " " ++ k )`seq`
-                let 
-                    measure_tag :: String -> (Rational, [String])
-                    measure_tag (y) =
-                        let (value, ks) = v (t-1) y -- ks ends in y
-                            trans_prob = taggram_prob y (take (fromInteger(n-1)) (init ks))
-                        in 
-                            --upsl ("value,ks,trprb,n" ++ show(value, ks, fromRational trans_prob,n)) `seq`
-                            (trans_prob * value, ks)
-                    options = map measure_tag taglist :: [(Rational, [String])]
-                    (best, ks) = 
-                        L.maximumBy (\(a,_) (b,_) -> a `compare` b) options
-                    lex_prob = tag_prob (w t) k
-                in 
-                    --upsl ("options: "++ (show (readable options))) `seq`
-                    (lex_prob * best, ks ++ [k])
-        options = map (\y -> v (toInteger . length $ words) y) taglist
-        {- if the test word didn't appear in the training set, you get the last
-        one in the list because we don't have smoothing, also, this should
-        probably be a special case -}
-        (best, ks) = L.maximumBy (\(a,_) (b,_) -> a `compare` b) options
-    in 
-        (best, ks)
+        v_sentence words = (best, ks) where
+            w n = words !! (fromInteger n - 1)
+            v :: Integer -> String -> (Rational, [String])
+            v = Memo.memo2 Memo.integral (Memo.list Memo.char) v'
+                where
+                v' 1 k = (tag_prob (w 1) k * initial_prob k, [k])
+                v' t k =
+                    upsl ("v' " ++ show(t) ++ " " ++ k )`seq`
+                    let 
+                        measure_tag :: String -> (Rational, [String])
+                        measure_tag (y) =
+                            let (value, ks) = v (t-1) y -- ks ends in y
+                                trans_prob = taggram_prob y (take (fromInteger(n-1)) (init ks))
+                            in 
+                                --upsl ("value,ks,trprb,n" ++ show(value, ks, fromRational trans_prob,n)) `seq`
+                                (trans_prob * value, ks)
+                        options = map measure_tag taglist :: [(Rational, [String])]
+                        (best, ks) = 
+                            L.maximumBy (\(a,_) (b,_) -> a `compare` b) options
+                        lex_prob = tag_prob (w t) k
+                    in 
+                        --upsl ("options: "++ (show (readable options))) `seq`
+                        (lex_prob * best, ks ++ [k])
+            options = map (\y -> v (toInteger . length $ words) y) taglist
+            (best, ks) = L.maximumBy (\(a,_) (b,_) -> a `compare` b) options
 
 count_dict :: Ord k => M.Map k Int -> Int
 count_dict m = M.fold (+) 0 m
@@ -145,7 +147,7 @@ main = do
     withFile "pos_corpora/test-obs_short.pos" ReadMode (\handle -> do 
         test <- hGetContents handle
         let unk = False 
-            smooth = True
+            smooth = True -- add-one smoothing
             tagged_words = (if unk then unktags else (\x->x)) $ posTag training
             sents = sentences tagged_words
             sents' = map (map swap) sents
@@ -159,7 +161,7 @@ main = do
 
             test_words = (lines test)
             test_sents = take 1 (single_sentences test_words)
-            t = head test_sents
+            t = test_sents
         word'tag `seq` taggrams `seq` print "read dataset"
         print $ viterbi unk smooth observed_words word'tag taggrams gram_counts t
         print $ t
