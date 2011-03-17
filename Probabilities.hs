@@ -102,7 +102,7 @@ upsl = unsafePerformIO . putStrLn
 viterbi :: Bool -> Bool ->
         S.Set String -> CountMap -> [M.Map [String] Int] -> [Int] ->
         [[String]] ->
-        [(Rational, [String])]
+        [[String]]
 viterbi unk smooth
         observed_words word'tag taggrams gram_counts
         all_words =
@@ -113,14 +113,14 @@ viterbi unk smooth
         tag_prob = tag_probability unk observed_words tag_sum word'tag
         taggram_prob = ngram_prob smooth gram_counts taggrams
         n = toInteger $ length taggrams - 1
-        v_sentence words = (best, ks) where
+        v_sentence words = ks where
             w n = words !! (fromInteger n - 1)
             v :: Integer -> String -> (Rational, [String])
             v = Memo.memo2 Memo.integral (Memo.list Memo.char) v'
                 where
                 v' 1 k = (tag_prob (w 1) k * initial_prob k, [k])
                 v' t k =
-                    upsl ("v' " ++ show(t) ++ " " ++ k )`seq`
+                    --upsl ("v' " ++ show(t) ++ " " ++ k )`seq`
                     let 
                         measure_tag :: String -> (Rational, [String])
                         measure_tag (y) =
@@ -144,7 +144,7 @@ count_dict m = M.fold (+) 0 m
 
 main = do
     training <- getContents
-    withFile "pos_corpora/test-obs_short.pos" ReadMode (\handle -> do 
+    withFile "pos_corpora/test-obs.pos" ReadMode (\handle -> do 
         test <- hGetContents handle
         let unk = False 
             smooth = True -- add-one smoothing
@@ -160,10 +160,12 @@ main = do
             observed_words = S.fromList (concat words)
 
             test_words = (lines test)
-            test_sents = take 1 (single_sentences test_words)
+            test_sents = (single_sentences test_words)
             t = test_sents
-        word'tag `seq` taggrams `seq` print "read dataset"
-        print $ viterbi unk smooth observed_words word'tag taggrams gram_counts t
-        print $ t
+            output_tags = 
+                observed_words `seq` word'tag `seq` taggrams `seq` gram_counts
+                `seq` putStrLn "read dataset" `seq`
+                concat $ viterbi unk smooth observed_words word'tag taggrams gram_counts t
+        putStrLn $ unlines . map show $ zip output_tags (concat t)
         hClose handle
         )
