@@ -1,7 +1,7 @@
 library(AlgDesign)
 
 lineCounts=c(100,1000,10000,996759)
-treatments=gen.factorial(c(4,2,2,2,length(lineCounts)), nVars=5,varNames=c('n','smooth.gram','smooth.lex','unk','log.train.line'),factors=2:5,center=F)
+treatments=gen.factorial(c(length(lineCounts),2,2,2,2), nVars=5,varNames=c('log.train.line','n','smooth.gram','smooth.lex','unk'),factors=c(1,3:5),center=F)
 treatments$n=treatments$n+1
 levels(treatments$smooth.gram)=c('None','Add One')
 levels(treatments$smooth.lex)=c('None','Add One')
@@ -34,3 +34,5 @@ row.names(treatments.rand)=sort(id)
 #if it's not in the same frames. Hmm well
 baseline=rep('?',2)
 names(baseline)=c('score','time')
+
+write.csv(treatments,file='experiment_design.csv',quote=F,row.names=F)
