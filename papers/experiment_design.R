@@ -14,6 +14,9 @@ treatments$time='?'
 #with replication and take the minimum times for each
 #treatment combination. So let's do that:
 
+treatments$file=paste(1:nrow(treatments),'.pos',sep='')
+
+#This is a different id from treatments$id
 id=order(runif(2*nrow(treatments)))
 treatments.rand=rbind(treatments,treatments)[id,]
 row.names(treatments.rand)=sort(id)
