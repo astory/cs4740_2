@@ -68,8 +68,8 @@ readable = map (\(a,b) -> (fromRational a, b))
 
 upsl = unsafePerformIO . putStrLn
 
-viterbi :: S.Set String -> CountMap -> [M.Map [String] Int] -> [String] -> (Rational, [String])
-viterbi observed_words word'tag taggrams words =
+viterbi :: S.Set String -> CountMap -> [M.Map [String] Int] -> [Int] -> [String] -> (Rational, [String])
+viterbi observed_words word'tag taggrams gram_counts words =
     let unigrams = taggrams !! 1
         taglist = L.concat . S.elems $ M.keysSet unigrams
         w n = words !! (fromInteger n - 1)
@@ -79,7 +79,7 @@ viterbi observed_words word'tag taggrams words =
                 Nothing -> 0 -- unknown tag, shouldn't happen
                 Just tagmap ->
                     case M.lookup word tagmap of
-                        Nothing -> 1 % 100000000 -- smoothing here
+                        Nothing -> 0 -- smoothing here
                         Just count ->
                             toInteger(count) % toInteger(sum_countmap tagmap)
         taggram_prob = ngram_prob taggrams
@@ -118,6 +118,9 @@ viterbi observed_words word'tag taggrams words =
     in 
         (best, ks)
 
+count_dict :: Ord k => M.Map k Int -> Int
+count_dict m = M.fold (+) 0 m
+
 main = do
     training <- getContents
     withFile "pos_corpora/test-obs_short.pos" ReadMode (\handle -> do 
@@ -130,14 +133,14 @@ main = do
 
             (tags, words) = split_tags sents
             taggrams = safe_ngram_tally 2 tags
+            gram_counts = map count_dict taggrams
             observed_words = S.fromList (concat words)
 
             test_words = (lines test)
             test_sents = take 1 (single_sentences test_words)
-            --t = ["<s>", "Kent", "cigarette", "filters"]
             t = head test_sents
         word'tag `seq` taggrams `seq` print "read dataset"
-        print $ viterbi observed_words word'tag taggrams t
+        print $ viterbi observed_words word'tag taggrams gram_counts t
         print $ t
         hClose handle
         )
