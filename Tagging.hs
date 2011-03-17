@@ -1,5 +1,6 @@
 module Tagging
 ( posTag
+, unkFirst
 ) where
 
 import System.IO

@@ -78,9 +78,9 @@ viterbi observed_words word'tag taggrams gram_counts words =
             case M.lookup tag word'tag of
                 Nothing -> 0 -- unknown tag, shouldn't happen
                 Just tagmap ->
-                    case M.lookup word (addOne tagmap) of -- smoothing for count>0 
+                    case M.lookup word (tagmap) of -- smoothing for count>0 
                         Nothing ->
-                            case M.lookup "<UNK>" tagmap
+                            case M.lookup "<UNK>" tagmap of
                                 Nothing -> 0 --No unknwonw word for this tag. This is where we smooth count=1
                                 Just count ->
                                      toInteger(count) % toInteger(sum_countmap tagmap)
