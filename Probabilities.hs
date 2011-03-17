@@ -73,8 +73,8 @@ viterbi word'tag taggrams words =
             case M.lookup tag word'tag of
                 Nothing -> 0 -- unknown tag, shouldn't happen
                 Just tagmap ->
-                    case M.lookup word tagmap of
-                        Nothing -> 1 % 1000 -- smoothing here
+                    case M.lookup word (addOne tagmap) of
+                        Nothing -> 1 % $ size tagmap -- smoothing for count=0
                         Just count ->
                             toInteger(count) % toInteger(sum_countmap tagmap)
         taggram_prob = ngram_prob taggrams
