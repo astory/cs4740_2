@@ -132,7 +132,7 @@ main = do
     training <- getContents
     withFile "pos_corpora/test-obs_short.pos" ReadMode (\handle -> do 
         test <- hGetContents handle
-        let tagged_words = unkFirst $ posTag training
+        let tagged_words = unktags $ posTag training
             sents = sentences tagged_words
             sents' = map (map swap) sents
             word'tag = val'key sents
