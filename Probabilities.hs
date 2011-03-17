@@ -73,8 +73,12 @@ viterbi word'tag taggrams words =
             case M.lookup tag word'tag of
                 Nothing -> 0 -- unknown tag, shouldn't happen
                 Just tagmap ->
-                    case M.lookup word (addOne tagmap) of -- smoothing for count>0
-                        Nothing -> 1 % $ size tagmap -- smoothing for count=0
+                    case M.lookup word (addOne tagmap) of -- smoothing for count>0 
+                        Nothing ->
+                            case M.lookup "<UNK>" tagmap
+                                Nothing -> 0 --No unknwonw word for this tag. This is where we smooth count=1
+                                Just count ->
+                                     toInteger(count) % toInteger(sum_countmap tagmap)
                         Just count ->
                             toInteger(count) % toInteger(sum_countmap tagmap)
         taggram_prob = ngram_prob taggrams
@@ -107,7 +111,7 @@ main = do
     training <- getContents
     withFile "pos_corpora/test-obs_short.pos" ReadMode (\handle -> do 
         test <- hGetContents handle
-        let tagged_words = posTag training
+        let tagged_words = unkFirst $ posTag training
             sents = sentences tagged_words
             sents' = map (map swap) sents
             word'tag = val'key sents

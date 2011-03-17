@@ -9,6 +9,7 @@ module Ngram
 , single_sentences
 , build_ngram_tally
 , safe_ngram_tally
+, addOne
 ) where
 
 import qualified Data.Map as M
@@ -91,4 +92,4 @@ main = do
     let tagged_words = posTag text
         sentences' = sentences tagged_words
         (tags, words) = split_tags sentences'
-    print $ last $ addOne $ build_ngram_tally 4 $ tags `seq` words
+    print $ addOne $ build_ngram_tally 4 $ tags `seq` words
