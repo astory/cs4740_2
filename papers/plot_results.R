@@ -1,5 +1,6 @@
-source('experiment_design.R')
-design=treatments
+#source('experiment_design.R')
+#design=treatments
+design=read.csv('experiment_design.csv')
 scores=read.csv('dummy_results.csv')
 results=merge(design,scores,by='file')
 
