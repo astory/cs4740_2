@@ -11,22 +11,27 @@ Our system is written in Haskell. It depends on the following modules
 
 Running the System
 =================
+The following sort of command will run the system
 
-A demo of the baseline system in a bash script.
-It produces predictions formatted for submission
-to the web form. Run the demo like this
+`run_tests.sh <training corpus size in words> > <output file>`.
 
-`$ chmod +x run_tests.sh submit_predictions.sh`
+For example
 
-`$ ./run_tests.sh > results/baseline.pos`
+`run_tests.sh 100000 > foo.pos`.
 
-Also included is a compiled binary file for x86_64 in case you do not wish to
-install Haskell.  The script runs this file by default; if want to compile it
-yourself, simply run
+
+Varying parameters
+--------------------
+Because we did not develop a command-line interface for passing
+parameters, the file must be recompiled to test different
+component arrangements
+
+To compile the executable, run
 
 `$ ghc --make Probabilities.hs`
 
-and then run `run_tests.sh`.
+
+
 
 Scoring
 ================
@@ -43,10 +48,3 @@ the following command to put them in a convenient format
 
 The email file(s) may not contain spaces.
 
-Data analysis
-================
-
-In order to ease the analysis, name the result .pos files
-according to the identifiers in the experiment_design.R file.
-
-Running plot_results.R will produce nice plots
