@@ -1,4 +1,4 @@
-\documentclass{article}
+\documentclass[letterpaper,11pt]{article}
 \usepackage{amsmath}
 \usepackage{booktabs}
 
@@ -155,7 +155,7 @@ from the prediction submission form.
 
 \begin{figure}
 \begin{center}
-<<echo=F,fig=T>>=
+<<echo=F,fig=T,height=9>>=
 posPlot.n()
 @
 \end{center}
@@ -164,7 +164,7 @@ posPlot.n()
 
 \begin{figure}
 \begin{center}
-<<echo=F,fig=T>>=
+<<echo=F,fig=T,height=9>>=
 posPlot.l()
 @
 \end{center}
@@ -287,6 +287,7 @@ of various system components in building an effective system. None of our
 advanced features improved performance over the baseline. Also, some of
 our system components interacted with other components such that a change
 in performance caused by one new component was conditional on which
-other components were being used.
+other components were being used. In the construction of complex
+systems, it is important to remember how their components interact.
 
 \end{document}
