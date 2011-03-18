@@ -1,6 +1,7 @@
 #source('experiment_design.R')
 #design=treatments
-lineCounts=c(10000,100000,996759)
+lineCountsChar=c('10000','100000','996759')
+lineCounts=as.numeric(lineCountsChar)
 design=read.csv('experiment_design.csv')
 scores=read.csv('results.csv')
 results=merge(design,scores,by='file')
@@ -23,11 +24,11 @@ startplot.n=function(...) {
 
 startplot.l=function(...) {
 	startplot(log(results$size),xlab='Number of words in the training set',...)
-	axis(1,at=log(lineCounts),labels=as.character(lineCounts))
+	axis(1,at=log(lineCounts),labels=lineCountsChar)
 }
 
-#par(mfrow=c(2,3))
-pdf('plot1.pdf')
+
+posPlot.n=function() {
 startplot.n(mainadd='using the full training corpus')
 
 points(score~n,subset(results,size==996759 & smooth.gram=='Off' & unk=='Off'),type='l',lty=1,col=1)
@@ -40,18 +41,28 @@ legend('bottom',c("Smoothing off, UNK off",'Smoothing off, UNK on,','Smoothing o
 	lty=rep(1:2,each=2),
 	col=rep(1:2,2)
 )
+}
 
+
+posPlot.l=function(){
+startplot.l(mainadd='using tag bigrams')
 results.l=results
 results.l$log=log(results.l$size)
+points(score~log,subset(results.l,n==2 & smooth.gram=='Off' & unk=='Off'),type='l',lty=1,col=1)
+points(score~log,subset(results.l,n==2 & smooth.gram=='Off' & unk=='On'),type='l',lty=1,col=2)
+points(score~log,subset(results.l,n==2 & smooth.gram=='On' & unk=='Off'),type='l',lty=2,col=1)
+points(score~log,subset(results.l,n==2 & smooth.gram=='On' & unk=='On'),type='l',lty=2,col=2)
+
+legend('bottom',c("Smoothing off, UNK off",'Smoothing off, UNK on,','Smoothing on, UNK off','Smoothing on, UNK on'),
+	lty=rep(1:2,each=2),
+	col=rep(1:2,2)
+)
+}
 
 
-dev.off()
-
-startplot.l()
-points(score~log,subset(results.l,smooth.gram=='On'),type='p')
-points(score~log,subset(results.l,smooth.gram=='Off'),type='p')
-
-startplot.l()
-points(score~log,subset(results.l,unk=='On'),type='p')
-points(score~log,subset(results.l,unk=='Off'),type='p')
-
+#Test here
+main=function(){
+	par(mfrow=c(1,2))
+	posPlot.n()
+	posPlot.l()
+}
