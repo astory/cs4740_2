@@ -18,12 +18,8 @@ source('plot_results.R')
 %plemented from scratch vs. obtained via an existing package. Explain
 %and motivate any preprocessing and design choices.
 \section{The Sequence Tagging Approach}
-
 %which data set(s) and algorithm(s) will you include? will you implement the
-\subsection{Data set}
 We developed a part-of-speech tagger.
-
-\subsection{Algorithms}
 We implemented our tagger in Haskell, using memoization instead of the
 traditional table-based Viterbi implementation (They are equivalent, but
 memoization is more natural for functional programming languages like Haskell).
@@ -34,9 +30,9 @@ sentences.  We chose sentences because that made it easier to avoid sentence
 boundaries interfering with our results with long n-grams, and because the
 implementation was easy in Haskell.
 
-We implemented unknown word handling as an option (although we did not implement
-command-line flags, so to change this, one must edit \verb+Probabilities.hs+).
-With unknowns on, the first time we see a word in the training set, we transform
+We implemented unknown word handling as an option.\footnote{We did not implement
+command-line flags, so to change this, one must edit \texttt{Probabilities.hs}. }
+With unknowns word handling on, the first time we see a word in the training set, we transform
 it to \verb+<UNK>+.  When we look up the lexical probability of the word given a
 tag, if there are no instances of that word with that tag, we return instead the
 probability of \verb+<UNK>+ given that tag.  With unknowns off, we return 1 if
@@ -60,13 +56,15 @@ Otherwise, because of the memoization we use, our implementation should have the
 same running time as other Viterbi implementations.  We observed that tagging
 and printing an average sentence takes about half a second.
 
-We also decided to use Haskell's built-in arbitrary precision arithmetic
-(dealing with probabilities as ratios of integers, which are unbounded in size) to
+We also decided to use Haskell's built-in arbitrary precision arithmetic%
+\footnote{Arbitrary precision arithmetic
+deals with probabilities as ratios of integers, which are unbounded in size} to
 avoid the vagaries of floating point errors.  Because this is tightly integrated
 into Haskell, the implementation was actually simplified from what it would have
-taken to write it using logarithmic arithmetic (which our previous project
-demonstrated was nearly as accurate for n-gram models of language, and is likely
-just as accurate here), but it slows down the code considerably.  We consider
+taken to write it using logarithmic arithmetic,\footnote{Our previous project
+found nearly identical results between these two methods
+for n-gram models of language, and the methods should be similarly close here}
+but it slows down the code considerably.  We consider
 this an acceptable trade-off.
 
 %2. Experiments. Motivate and describe the experiments that you ran.
@@ -265,8 +263,9 @@ baseline.
 \label{tab:mytable}
 <<mytable,echo=F,results=tex>>=
        library(xtable)
-       results_=results[c('n','smooth.gram','unk','size','score')]
-       names(results)=c('n','Smoothing','UNK','Size','Score')
+       results_=results[c('n','unk','smooth.gram','size','score')][order(results$n),]
+       names(results_)=c('n','UNK','Smoothing','Size','Score')
+       row.names(results_)=1:11
        mat <- xtable(results_)
        print(mat,
              sanitize.text.function = function(x){x},
