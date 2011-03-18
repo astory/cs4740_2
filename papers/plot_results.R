@@ -11,7 +11,7 @@ startplot=function(x,xlab='N-gram length',mainadd='',...){
 	plot(score~x,results,type='n',axes=F,
 		xlab=xlab,
                 ylab='Score',ylim=c(0,100),
-		main=paste('Performance of the part-of-speech tagger',mainadd),
+		main=paste('Performance',mainadd),
 		...
 	)
 	par(las=2);axis(2,at=c(seq(0,100,20),baseline),labels=c(paste(seq(0,100,20),'%',sep=''),'BL'));par(las=1)
@@ -48,14 +48,12 @@ posPlot.l=function(){
 startplot.l(mainadd='using tag bigrams')
 results.l=results
 results.l$log=log(results.l$size)
-points(score~log,subset(results.l,n==2 & smooth.gram=='Off' & unk=='Off'),type='l',lty=1,col=1)
 points(score~log,subset(results.l,n==2 & smooth.gram=='Off' & unk=='On'),type='l',lty=1,col=2)
-points(score~log,subset(results.l,n==2 & smooth.gram=='On' & unk=='Off'),type='l',lty=2,col=1)
 points(score~log,subset(results.l,n==2 & smooth.gram=='On' & unk=='On'),type='l',lty=2,col=2)
 
-legend('bottom',c("Smoothing off, UNK off",'Smoothing off, UNK on,','Smoothing on, UNK off','Smoothing on, UNK on'),
-	lty=rep(1:2,each=2),
-	col=rep(1:2,2)
+legend('bottom',c('Smoothing off','Smoothing'),
+	lty=1:2,
+	col=2
 )
 }
 
