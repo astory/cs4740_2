@@ -1,7 +1,7 @@
 #source('experiment_design.R')
 #design=treatments
 design=read.csv('experiment_design.csv')
-scores=read.csv('dummy_results.csv')
+scores=read.csv('results.csv')
 results=merge(design,scores,by='file')
 
 startplot=function(x,xlab='N-gram length',...){
