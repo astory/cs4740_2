@@ -1,65 +1,11 @@
-log.train.line,n,smooth.gram,smooth.lex,unk,file
-4.60517018598809,2,None,None,None,1.pos
-6.90775527898214,2,None,None,None,2.pos
-9.21034037197618,2,None,None,None,3.pos
-13.8122642945482,2,None,None,None,4.pos
-4.60517018598809,3,None,None,None,5.pos
-6.90775527898214,3,None,None,None,6.pos
-9.21034037197618,3,None,None,None,7.pos
-13.8122642945482,3,None,None,None,8.pos
-4.60517018598809,2,Add One,None,None,9.pos
-6.90775527898214,2,Add One,None,None,10.pos
-9.21034037197618,2,Add One,None,None,11.pos
-13.8122642945482,2,Add One,None,None,12.pos
-4.60517018598809,3,Add One,None,None,13.pos
-6.90775527898214,3,Add One,None,None,14.pos
-9.21034037197618,3,Add One,None,None,15.pos
-13.8122642945482,3,Add One,None,None,16.pos
-4.60517018598809,2,None,Add One,None,17.pos
-6.90775527898214,2,None,Add One,None,18.pos
-9.21034037197618,2,None,Add One,None,19.pos
-13.8122642945482,2,None,Add One,None,20.pos
-4.60517018598809,3,None,Add One,None,21.pos
-6.90775527898214,3,None,Add One,None,22.pos
-9.21034037197618,3,None,Add One,None,23.pos
-13.8122642945482,3,None,Add One,None,24.pos
-4.60517018598809,2,Add One,Add One,None,25.pos
-6.90775527898214,2,Add One,Add One,None,26.pos
-9.21034037197618,2,Add One,Add One,None,27.pos
-13.8122642945482,2,Add One,Add One,None,28.pos
-4.60517018598809,3,Add One,Add One,None,29.pos
-6.90775527898214,3,Add One,Add One,None,30.pos
-9.21034037197618,3,Add One,Add One,None,31.pos
-13.8122642945482,3,Add One,Add One,None,32.pos
-4.60517018598809,2,None,None,First Occurrence,33.pos
-6.90775527898214,2,None,None,First Occurrence,34.pos
-9.21034037197618,2,None,None,First Occurrence,35.pos
-13.8122642945482,2,None,None,First Occurrence,36.pos
-4.60517018598809,3,None,None,First Occurrence,37.pos
-6.90775527898214,3,None,None,First Occurrence,38.pos
-9.21034037197618,3,None,None,First Occurrence,39.pos
-13.8122642945482,3,None,None,First Occurrence,40.pos
-4.60517018598809,2,Add One,None,First Occurrence,41.pos
-6.90775527898214,2,Add One,None,First Occurrence,42.pos
-9.21034037197618,2,Add One,None,First Occurrence,43.pos
-13.8122642945482,2,Add One,None,First Occurrence,44.pos
-4.60517018598809,3,Add One,None,First Occurrence,45.pos
-6.90775527898214,3,Add One,None,First Occurrence,46.pos
-9.21034037197618,3,Add One,None,First Occurrence,47.pos
-13.8122642945482,3,Add One,None,First Occurrence,48.pos
-4.60517018598809,2,None,Add One,First Occurrence,49.pos
-6.90775527898214,2,None,Add One,First Occurrence,50.pos
-9.21034037197618,2,None,Add One,First Occurrence,51.pos
-13.8122642945482,2,None,Add One,First Occurrence,52.pos
-4.60517018598809,3,None,Add One,First Occurrence,53.pos
-6.90775527898214,3,None,Add One,First Occurrence,54.pos
-9.21034037197618,3,None,Add One,First Occurrence,55.pos
-13.8122642945482,3,None,Add One,First Occurrence,56.pos
-4.60517018598809,2,Add One,Add One,First Occurrence,57.pos
-6.90775527898214,2,Add One,Add One,First Occurrence,58.pos
-9.21034037197618,2,Add One,Add One,First Occurrence,59.pos
-13.8122642945482,2,Add One,Add One,First Occurrence,60.pos
-4.60517018598809,3,Add One,Add One,First Occurrence,61.pos
-6.90775527898214,3,Add One,Add One,First Occurrence,62.pos
-9.21034037197618,3,Add One,Add One,First Occurrence,63.pos
-13.8122642945482,3,Add One,Add One,First Occurrence,64.pos
+"size","n","smooth.gram","unk","file"
+10000,2,"On","Off","alec1"
+100000,2,"On","Off","alec2"
+996759,2,"On","On","tom2.pos"
+996759,2,"On","Off","alec3"
+996759,2,"Off","On","tom3.pos"
+996759,2,"Off","Off","tom1.pos"
+996759,3,"On","On","tom5.pos"
+996759,3,"On","Off","alec4"
+996759,3,"Off","On","tom4.pos"
+996759,3,"Off","Off","tom6.pos"
