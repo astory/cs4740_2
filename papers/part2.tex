@@ -36,14 +36,16 @@ like Haskell.
 %What were your hupotheses as to what would happen?
 \section{Experiments}
 
-
 As we were developing the system, we noticed that some components performed
-very poorly with small training sets. 
-We studied interactions between training set size and system components.
+very poorly with small training sets. Specifically, we found our approach to
+unknown word handling to work quite miserably on small test sets. Thus,
+we also studied interactions between training set size and system components.
 
 We used a $2\times2\times2$ factorial design to test the effects of different
 system components and their interactions on different system components.
-For one of the 8 treatment combinations in this design, we also tested
+For two of the eight treatment combinations in this design, we also tested
+different training corpus sizes. These two treatment combinations were
+identical except for the handling of unknown words.
 
 
 \begin{table}
