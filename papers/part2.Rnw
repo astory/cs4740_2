@@ -103,16 +103,15 @@ and corpus size. For this sub-experiment, we used two training corpus sizes
 This sub-experiment was thus a $2\times2$ factorial experiment run for
 bigrams with bigram smoothing on.
 
-We had four hypotheses
-\begin{itemize}
+We made the following hypotheses.
+\begin{enumerate}
 \item The best performing treatment combination will be n-gram length 3,
 n-gram smoothing on, unknown word handling off and the full corpus size.
-\item We also hypothesized that unknown word handling will generally
-decrease performance
+\item Unknown word handling will generally decrease performance
 \item A smaller training corpus will result in a lower score.
 \item Unknown word handling will decrease performance more when the
 training corpus is small than when the training corpus is large
-\end{itemize}
+\end{enumerate}
 
 \begin{table}
 \begin{tabular}{lcccc}
@@ -121,8 +120,8 @@ training corpus is small than when the training corpus is large
 \cmidrule{2-5}
        & Training size & $n$-gram length & $n$-gram smoothing & UNK\\
 \cmidrule{2-5}
-Levels &  10000   &  2  & None    & None \\
-       & 996759   &  3  & Add One & First occurrance  \\
+Levels &  10000 words  &  Bigram  & None    & None \\
+       & 996759 words  &  Trigram & Add One & First occurrance  \\
 \cmidrule{2-5}
 %\bottomrule
 \end{tabular}
@@ -211,7 +210,7 @@ system to produce accurate results.
 
 \subsection{Corpus size}
 Increasing the training corpus size invariably yielded result in a higher score.
-The increase in score was on the order of 10\% for every 1000\% increase
+The increase in score was on the order of 10 points for every 1000\% increase
 in training corpus size.  Increasing the training corpus improves the number of
 words we've seen, which means that we have to guess a proper noun less often,
 and also improves the n-gram model of tags, so we get better tag sequences in
