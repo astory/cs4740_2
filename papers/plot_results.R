@@ -10,7 +10,7 @@ baseline=93
 startplot=function(x,xlab='N-gram length',mainadd='',...){
 	plot(score~x,results,type='n',axes=F,
 		xlab=xlab,
-                ylab='Score',ylim=c(-20,100),
+                ylab='Score',ylim=c(0,120),
 		main=paste('Performance',mainadd),
 		...
 	)
@@ -37,7 +37,7 @@ points(score~n,subset(results,size==996759 & smooth.gram=='On' & unk=='Off'),typ
 points(score~n,subset(results,size==996759 & smooth.gram=='On' & unk=='On'),type='l',lty=2,lwd=2,col=2)
 
 
-legend('bottom',c("Smoothing off, UNK off",'Smoothing off, UNK on,','Smoothing on, UNK off','Smoothing on, UNK on'),
+legend('top',c("Smoothing off, UNK off",'Smoothing off, UNK on,','Smoothing on, UNK off','Smoothing on, UNK on'),
 	lty=rep(1:2,each=2),
 	lwd=rep(c(1,2),each=2),
 	col=rep(1:2,2)
@@ -52,7 +52,7 @@ results.l$log=log(results.l$size)
 points(score~log,subset(results.l,n==2 & smooth.gram=='On' & unk=='Off'),type='l',lty=2,lwd=2,col=1)
 points(score~log,subset(results.l,n==2 & smooth.gram=='On' & unk=='On'),type='l',lty=2,lwd=2,col=2)
 
-legend('bottom',c('UNK off','UNK on'),
+legend('top',c('UNK off','UNK on'),
 	lty=2,
 	lwd=2,
 	col=1:2
