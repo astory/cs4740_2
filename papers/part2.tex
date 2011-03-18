@@ -14,26 +14,46 @@
 %and motivate any preprocessing and design choices.
 \section{The Sequence Tagging Approach}
 
-
 %which data set(s) and algorithm(s) will you include? will you implement the
 \subsection{Data set}
 We will study part-of-speech tagging.
 \subsection{Algorithms}
-We plan to implement all of our tools from scratch or nearly-scratch in Haskell,
-a modern functional programming language with monadic I/O.  We have already
-implemented a system to read the input files and produce a usable dictionary of
-arbitrary n-grams (over arbitrary objects, in our case, we will use tags), and
-can produce probabilities for any pair of arbitrary objects taken from a list
-(in our case, words and tags).  These components yield all the data we need to
-compute the Viterbi algorithm.  Our implementation of Viterbi will \emph{not} be
-the traditional table-based implementation; rather, it will use memoization
-because such an approach is more natural for a functional programming language
-like Haskell.
 
+We implemented our tagger in Haskell, using memoization instead of the
+traditional table-based Viterbi implementation (they are equivalent, but
+memoization is more natural for functional programming languages like Haskell).
 
+We broke the input into sentences, fed each of those into a sentence chunker,
+and derived tag n-grams and lexical probabilities for the tags from these
+sentences.  We chose sentences because that made it easier to avoid sentence
+boundaries interfering with our results with long n-grams, and because the
+implementation was easy in Haskell.
+
+We implemented unknown word handling as an option (although we did not implement
+command-line flags, so to change this, one must edit \verb+Probabilities.hs+).
+With unknowns on, the first time we see a word in the training set, we transform
+it to \verb+<UNK>+.  When we look up the lexical probability of the word given a
+tag, if there are no instances of that word with that tag, we return instead the
+probability of \verb+<UNK>+ given that tag.  With unknowns off, we return 1 if
+the tag is ``NNP'' and 0 otherwise.
+
+We also implemented add-one smoothing, which is similarly controlled by a single
+boolean flag.
+
+We should note that Haskell's implementation of Map, the hash-like data
+structure we rely on heavily for looking up n-grams and lexical probabilities is
+implemented using trees, so insertion and lookup operations on it have a runtime
+of $O(log\text{ } n)$.  This slows down our implementation, but $log\text{ } n$ grows so slowly
+that in practice this is not likely to be a serious detriment.  It should also
+be noted that all but the sneakiest implementations of hashes have amortized
+$log\text{ } n$  insertion time.
+
+Otherwise, because of the memoization we use, our implementation should have the
+same running time as other Viterbi implementations.  We observed that tagging
+and printing an average sentence takes about half a second.
 
 %2. Experiments. Motivate and describe the experiments that you ran.
-%What were your hupotheses as to what would happen?
+%What were your hypotheses as to what would happen?
 \section{Experiments}
 As we were developing the system, we noticed that some components performed
 very poorly with small training sets. 
@@ -81,17 +101,8 @@ most likely tag.
 Unknown words are tagged as proper noun.
 The baseline system does not do any smoothing.
 
-The predictions from the baseline system had a score of 47.83\%
+The predictions from the baseline system had a score of 93\%
 from the prediction submission form.
-
-%3. The code for the baseline system if you are implementing from
-%scratch. If you are using a package, do not submit the code.
-
-\section{The Code}
-
-We recognize that Haskell is a language that may not be installed on your
-machine.  Instructions for running our code with (and without!) Haskell
-installed are included in our \verb+Readme+.
 
 %3. Results. Summarize the performance of your system on both the
 %training and test data. Minimally, you should compare your results
