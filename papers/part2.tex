@@ -36,7 +36,8 @@ With unknowns on, the first time we see a word in the training set, we transform
 it to \verb+<UNK>+.  When we look up the lexical probability of the word given a
 tag, if there are no instances of that word with that tag, we return instead the
 probability of \verb+<UNK>+ given that tag.  With unknowns off, we return 1 if
-the tag is ``NNP'' and 0 otherwise.
+the tag is ``NNP'' and 0 otherwise.  We have shipped the code with reasonable
+defaults.
 
 We also implemented add-one smoothing, which is similarly controlled by a single
 boolean flag.
@@ -52,6 +53,15 @@ $log\text{ } n$  insertion time.
 Otherwise, because of the memoization we use, our implementation should have the
 same running time as other Viterbi implementations.  We observed that tagging
 and printing an average sentence takes about half a second.
+
+We also decided to use Haskell's built-in arbitrary precision arithmetic
+(dealing with probabilities as ratios of integers, which are unbounded in size) to
+avoid the vagaries of floating point errors.  Because this is tightly integrated
+into Haskell, the implementation was actually simplified from what it would have
+taken to write it using logarithmic arithmetic (which our previous project
+demonstrated was nearly as accurate for n-gram models of language, and is likely
+just as accurate here), but it slows down the code considerably.  We consider
+this an acceptable trade-off.
 
 %2. Experiments. Motivate and describe the experiments that you ran.
 %What were your hypotheses as to what would happen?
