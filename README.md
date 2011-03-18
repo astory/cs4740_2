@@ -19,11 +19,11 @@ Running the System
 =================
 The following sort of command will run the system
 
-`run_test.sh <training corpus size in words> > <output file>`.
+`sh run_test.sh <training corpus size in words> > <output file>`.
 
 For example
 
-`run_test.sh 100000 > foo.pos`.
+`sh run_test.sh 100000 > foo.pos`.
 
 
 Varying parameters
@@ -57,13 +57,13 @@ Scoring
 You can submit the resulting predictions like this. (This
 depends on curl.)
 
-`$ ./submit_predictions.sh <netid> results/baseline.pos`
+`$ sh submit_predictions.sh <netid> results/foo.pos`
 
 Save the emails with the submission results in plain text
 as separate files (.eml) or as one file (.mbox), and run
 the following command to put them in a convenient format.
 
-`$ ./tabulate_predictions.sh emails.mbox > results/results.csv`
+`$ sh tabulate_predictions.sh emails.mbox > results/results.csv`
 
 The email filename(s) may not contain spaces.
 
