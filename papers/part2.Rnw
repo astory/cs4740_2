@@ -152,14 +152,36 @@ from the prediction submission form.
 %to the baseline. Please put the results into clearly labeled tables or
 %diagrams and include a written summary of the results.
 \section{Results}
+None of our system adjustments yielded improved performance over the baseline.
+
+\begin{figure}
+\begin{center}
+<<echo=F,fig=T>>=
+posPlot.n()
+@
+\end{center}
+\caption{\label{fig:n}Score of predictions as a function of $n$-gram length, use of smoothing and use of unknown word handling with training on the full training corpus. ``BL'' refers to the baseline score.}
+\end{figure}
+
+\begin{figure}
+\begin{center}
+<<echo=F,fig=T>>=
+posPlot.l()
+@
+\end{center}
+\caption{\label{fig:l}Score of predictions as a function of training corpus size and use of unknown word handling with smoothed bigram probabilities. ``BL'' refers to the baseline score.}
+\end{figure}
+
+
 
 \subsection{Best performance}
-The best performing system was combination bigrams with $n$-gram smoothing on,
+Aside from the baseline,
+the best performing system was combination bigrams with $n$-gram smoothing on,
 unknown word handling off and the full corpus size. With $n$-gram smoothing on
 and unknown word handling off, $n$-gram length did not seem to matter much;
 we found similar results for
 bigrams (\Sexpr{subset(results,unk=='Off'&smooth.gram=='On'&size==996759&n==2)$score}\%)
-and trigrams (\Sexpr{subset(results,unk=='Off'&smooth.gram=='On'&size==996759&n==2)$score}\%).
+and trigrams (\Sexpr{subset(results,unk=='Off'&smooth.gram=='On'&size==996759&n==3)$score}\%).
 
 \subsection{Unknown words}
 Unknown word handling generally decreased performance. Whenever we turned
@@ -183,28 +205,31 @@ the two lines are different.
 Note, however, that this interaction effect is quite small compared
 to the main effect of unknown word handling being turned on or off.
 
-\end{itemize}
 
-
-
-
-\begin{figure}
-\begin{center}
-<<echo=F,fig=T>>=
-posPlot.n()
+\begin{table}
+\centering
+\label{tab:mytable}
+<<mytable,echo=F,results=tex>>=
+       library(xtable)
+       results_=results[c('n','smooth.gram','unk','size','score')]
+       names(results)=c('n','Smoothing','UNK','Size','Score')
+       mat <- xtable(results_)
+       print(mat,
+             sanitize.text.function = function(x){x},
+             floating=FALSE,
+             hline.after=NULL)
 @
-\end{center}
-\caption{\label{fig:n}Score of predictions as a function of $n$-gram length, use of smoothing and use of unknown word handling with training on the full training corpus. ``BL'' refers to the baseline score.}
-\end{figure}
+\caption{\label{tab:res}All of our non-baseline results are presented in this table.
+``n'' is the $n$-gram length, where 2 is bigram and 3 is trigram.
+``Smoothing'' is whether $n$-gram smoothing was on or off.
+``UNK'' is whether unknown word handling was on or off.
+``Size'' refers to the number of words in the training corpus.
+``Score'' is the percentage of words correctly tagged.
+Our baseline score was 93\%.}
+\end{table}
 
-\begin{figure}
-\begin{center}
-<<echo=F,fig=T>>=
-posPlot.l()
-@
-\end{center}
-\caption{\label{fig:n}Score of predictions as a function of training corpus size and use of unknown word handling with smoothed bigram probabilities. ``BL'' refers to the baseline score.}
-\end{figure}
+
+
 
 %4. Discussion of the results. This section should include any observa-
 %tions regarding your system’s performance — e.g. When did it work
