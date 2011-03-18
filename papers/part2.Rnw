@@ -2,14 +2,15 @@
 \usepackage{amsmath}
 \usepackage{booktabs}
 
+\newcommand{\osn}{\oldstylenums}
+\begin{document}
+
 <<echo=F>>=
 source('plot_results.R')
 @
-
-\newcommand{\osn}{\oldstylenums}
-\title{Sequence Tagging: Part One}
+\title{Sequence Tagging: Part Two}
 \author{Thomas Levine and Alec Story\\\small{tkl\osn{22} \& avs\osn{38}}}
-\begin{document}
+
 \maketitle
 
 %1. The Sequence Tagging Approach. Make clear which sequence
@@ -46,12 +47,14 @@ We also implemented add-one smoothing, which is similarly controlled by a single
 boolean flag.
 
 We should note that Haskell's implementation of Map, the hash-like data
-structure we rely on heavily for looking up n-grams and lexical probabilities, is
-implemented using trees, so insertion and lookup operations on it have a runtime
-of $O(log\text{ } n)$.  This slows down our implementation, but $log\text{ } n$ grows so slowly
-that in practice this is not likely to be a serious detriment.  It should also
-be noted that all but the sneakiest implementations of hashes have amortized
-$log\text{ } n$  insertion time.
+structure we rely on heavily for looking up n-grams and lexical probabilities,
+is implemented using trees, so insertion and lookup operations on it have a
+runtime of $O(log\text{ } n)$.  This slows down our implementation, but
+$log\text{ } n$ grows so slowly that in practice this is not likely to be a
+serious detriment.  It should also be noted that all but the sneakiest
+implementations of hashes have amortized $log\text{ } n$  insertion time, so
+other languages also have this limitation for building their hashes, although
+not for accessing them.
 
 Otherwise, because of the memoization we use, our implementation should have the
 same running time as other Viterbi implementations.  We observed that tagging
@@ -151,8 +154,7 @@ from the prediction submission form.
 %training and test data. Minimally, you should compare your results
 %to the baseline. Please put the results into clearly labeled tables or
 %diagrams and include a written summary of the results.
-\section{Results}
-None of our system adjustments yielded improved performance over the baseline.
+
 
 \begin{figure}
 \begin{center}
@@ -173,6 +175,8 @@ posPlot.l()
 \end{figure}
 
 
+\section{Results \& Discussion}
+None of our system adjustments yielded improved performance over the baseline.
 
 \subsection{Best performance}
 Aside from the baseline,
@@ -183,10 +187,24 @@ we found similar results for
 bigrams (\Sexpr{subset(results,unk=='Off'&smooth.gram=='On'&size==996759&n==2)$score}\%)
 and trigrams (\Sexpr{subset(results,unk=='Off'&smooth.gram=='On'&size==996759&n==3)$score}\%).
 
+This performance was less good than that of the baseline, which simply chose the
+most likely tag, defaulting to ``NNP.''  This indicates that simple heuristics
+do very well, but we suspect that, with another factor of 10 increase to the
+training data, we could probably do better than the baseline.
+
+The baseline only scales with more training data in that it knows about more
+words.  The hidden markov model learns the same relationships, but also learns
+the n-gram tag model, which gets better and better as input size increases,
+while lexical probabilities stop improving once you've seen most of the words in
+English.
+
 \subsection{Unknown words}
-Unknown word handling generally decreased performance. Whenever we turned
+Unknown word handling with unks generally decreased performance. Whenever we turned
 unknown word handling on while keeping everything else the same, performance
-decreased substantially.
+decreased substantially.  This is probably because, with our input set size,
+we've got a lot of instances of words that we only see once:  transforming them
+to unks means that we don't see them at all, which reduces the ability of our
+system to produce accurate results.
 
 %with a mean decrease of
 %subset(results,size==996759&unk=='On')-subset(results,size==996759&unk=='Off')
@@ -194,16 +212,29 @@ decreased substantially.
 \subsection{Corpus size}
 Increasing the training corpus size invariably yielded result in a higher score.
 The increase in score was on the order of 10\% for every 1000\% increase
-in training corpus size.
+in training corpus size.  Increasing the training corpus improves the number of
+words we've seen, which means that we have to guess a proper noun less often,
+and also improves the n-gram model of tags, so we get better tag sequences in
+the resulting tagging.
 
 \subsection{Unknown words $\times$ corpus size}
-There was a mild interaction between unknown word handling and corpus
-size. When corpus size was varied, the difference in score was
-slightly larger when unknown word handling was on than when it was off.
-One can see this graphically in figure \ref{fig:l}; the slopes of
-the two lines are different.
-Note, however, that this interaction effect is quite small compared
-to the main effect of unknown word handling being turned on or off.
+There was a mild interaction between unknown word handling and corpus size. When
+corpus size was varied, the difference in score was slightly larger when unknown
+word handling was on than when it was off.  One can see this graphically in
+figure \ref{fig:l}; the slopes of the two lines are different.  Note, however,
+that this interaction effect is quite small compared to the main effect of
+unknown word handling being turned on or off.  This is probably because
+transforming the first occurence of a word into an unk amplifies the effect of
+having a strong, deep training corpus.  There are more words proportionally that
+appear only once in shorter training corpora than in very long corpora that
+contain many more words than English does.
+
+As a final note, there are many variables that we did not explore in our study
+that could have improved performance.  For example, we did not determine the
+effects of reducing all the input to lower case, or writing a series of
+heuristics for choosing tags for words that we have not seen, without unking.
+Such techniques would likely have pushed performance higher, above that of the
+baseline.
 
 
 \begin{table}
@@ -227,30 +258,4 @@ to the main effect of unknown word handling being turned on or off.
 ``Score'' is the percentage of words correctly tagged.
 Our baseline score was 93\%.}
 \end{table}
-
-
-
-
-%4. Discussion of the results. This section should include any observa-
-%tions regarding your system’s performance — e.g. When did it work
-%well, when did it fail, why? How might you improve the system?
-%Additional analysis is always good. You can do an error analysis —
-%what sorts of errors occurred, and why? You can provide a learning
-%curve — how does your model’s performance change with the amount
-%of training data provided. You can come up with a better baseline and
-%compare your systems against that.
-\section{Discussion}
-
-As expected, each factor of 10 increase in training set size led to a
-significant increase in accuracy.  This is because more and more words are known
-(particularly for the 10,000 word case, there were likely many words that were
-simply not in the corpus).
-
-While the baseline system was better than our Viterbi model, this advantage is
-unlikely to scale as more data is fed into Viterbi - if we had a training corpus
-of 10s of millions of words, we would probably see another increase in accuracy
-and be able to beat out the baseline system.  Further tweaking would also likely
-increase accuracy; there are many variables we did not explore - for example,
-stripping uppercase from the input.
-
 \end{document}
