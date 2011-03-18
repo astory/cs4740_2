@@ -62,7 +62,9 @@ legend('bottom',c("Smoothing off, UNK off",'Smoothing off, UNK on,','Smoothing o
 
 #Test here
 main=function(){
+	pdf('plot1.pdf')
 	par(mfrow=c(1,2))
 	posPlot.n()
 	posPlot.l()
+	dev.off()
 }
