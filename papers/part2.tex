@@ -20,7 +20,7 @@ We will study part-of-speech tagging.
 \subsection{Algorithms}
 
 We implemented our tagger in Haskell, using memoization instead of the
-traditional table-based Viterbi implementation (they are equivalent, but
+traditional table-based Viterbi implementation (They are equivalent, but
 memoization is more natural for functional programming languages like Haskell).
 
 We broke the input into sentences, fed each of those into a sentence chunker,
@@ -41,7 +41,7 @@ We also implemented add-one smoothing, which is similarly controlled by a single
 boolean flag.
 
 We should note that Haskell's implementation of Map, the hash-like data
-structure we rely on heavily for looking up n-grams and lexical probabilities is
+structure we rely on heavily for looking up n-grams and lexical probabilities, is
 implemented using trees, so insertion and lookup operations on it have a runtime
 of $O(log\text{ } n)$.  This slows down our implementation, but $log\text{ } n$ grows so slowly
 that in practice this is not likely to be a serious detriment.  It should also
@@ -55,18 +55,47 @@ and printing an average sentence takes about half a second.
 %2. Experiments. Motivate and describe the experiments that you ran.
 %What were your hypotheses as to what would happen?
 \section{Experiments}
+Initially, we planned on testing the effects of different system components
+on the score. We decided to vary n-gram length, unknown word handling and
+n-gram smoothing to see how these three components affected performance.
 
 As we were developing the system, we noticed that some components performed
 very poorly with small training sets. Specifically, we found our approach to
 unknown word handling to work quite miserably on small test sets. Thus,
 we also studied interactions between training set size and system components.
 
-We used a $2\times2\times2$ factorial design to test the effects of different
+We used a $2\times2\times2$ factorial design to test the effects of the different
 system components and their interactions on different system components.
+The three factors in this design were
+\begin{enumerate}
+\item n-gram length (bigram or trigram)
+\item n-gram smoothing (on or off)
+\item unknown word handling (on or off)
+\end{enumerate}
 For two of the eight treatment combinations in this design, we also tested
-different training corpus sizes. These two treatment combinations were
-identical except for the handling of unknown words.
+different training corpus sizes. We chose two treatment combinations that were
+identical except for the handling of unknown words so that we could test
+for an interaction between unknown word handling and training corpus size;
+for this sub-experiment held n-gram length constant (bigram) and n-gram
+smoothing constant (on) while varying unknown word handling (on or off)
+and corpus size. For this sub-experiment, we used two training corpus sizes
+\begin{itemize}
+\item 100,000 words
+\item 996,759 words (full corpus)
+\end{itemize}
+This sub-experiment was thus a $2\times2$ factorial experiment run for
+bigrams with bigram smoothing on.
 
+We had four hypotheses
+\begin{itemize}
+\item The best performing treatment combination will be n-gram length 3,
+n-gram smoothing on, unknown word handling off and the full corpus size.
+\item We also hypothesized that unknown word handling will generally
+decrease performance
+\item A smaller training corpus will result in a lower score.
+\item Unknown word handling will decrease performance more when the
+training corpus is small than when the training corpus is large
+\end{itemize}
 
 \begin{table}
 \begin{tabular}{lcccc}
@@ -75,10 +104,8 @@ identical except for the handling of unknown words.
 \cmidrule{2-5}
        & Training size & $n$-gram length & $n$-gram smoothing & UNK\\
 \cmidrule{2-5}
-Levels & 100     &  2  & None    & None \\
-       & 1000    &  3  & Add One & First occurrance  \\
-       & \vdots  &  \vdots  &     &      &      \\
-       & 996759  &  5  &     &      &      \\
+Levels &  10000   &  2  & None    & None \\
+       & 996759   &  3  & Add One & First occurrance  \\
 \cmidrule{2-5}
 %\bottomrule
 \end{tabular}
