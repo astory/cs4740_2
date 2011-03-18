@@ -35,4 +35,4 @@ row.names(treatments.rand)=sort(id)
 baseline=rep('?',2)
 names(baseline)=c('score','time')
 
-write.csv(treatments,file='experiment_design.csv',quote=F,row.names=F)
+#write.csv(treatments,file='experiment_design.csv',quote=F,row.names=F)

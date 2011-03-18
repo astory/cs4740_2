@@ -1,4 +1,5 @@
 \documentclass{article}
+\usepackage{amsmath}
 \usepackage{booktabs}
 %By 11:59pm, Thursday, March 10th, you need to submit:
 %1. A short document that indicates your plan for the project
@@ -14,30 +15,98 @@
 %and motivate any preprocessing and design choices.
 \section{The Sequence Tagging Approach}
 
-
 %which data set(s) and algorithm(s) will you include? will you implement the
 \subsection{Data set}
 We will study part-of-speech tagging.
 \subsection{Algorithms}
-We plan to implement all of our tools from scratch or nearly-scratch in Haskell,
-a modern functional programming language with monadic I/O.  We have already
-implemented a system to read the input files and produce a usable dictionary of
-arbitrary n-grams (over arbitrary objects, in our case, we will use tags), and
-can produce probabilities for any pair of arbitrary objects taken from a list
-(in our case, words and tags).  These components yield all the data we need to
-compute the Viterbi algorithm.  Our implementation of Viterbi will \emph{not} be
-the traditional table-based implementation; rather, it will use memoization
-because such an approach is more natural for a functional programming language
-like Haskell.
 
+We implemented our tagger in Haskell, using memoization instead of the
+traditional table-based Viterbi implementation (They are equivalent, but
+memoization is more natural for functional programming languages like Haskell).
 
+We broke the input into sentences, fed each of those into a sentence chunker,
+and derived tag n-grams and lexical probabilities for the tags from these
+sentences.  We chose sentences because that made it easier to avoid sentence
+boundaries interfering with our results with long n-grams, and because the
+implementation was easy in Haskell.
+
+We implemented unknown word handling as an option (although we did not implement
+command-line flags, so to change this, one must edit \verb+Probabilities.hs+).
+With unknowns on, the first time we see a word in the training set, we transform
+it to \verb+<UNK>+.  When we look up the lexical probability of the word given a
+tag, if there are no instances of that word with that tag, we return instead the
+probability of \verb+<UNK>+ given that tag.  With unknowns off, we return 1 if
+the tag is ``NNP'' and 0 otherwise.  We have shipped the code with reasonable
+defaults.
+
+We also implemented add-one smoothing, which is similarly controlled by a single
+boolean flag.
+
+We should note that Haskell's implementation of Map, the hash-like data
+structure we rely on heavily for looking up n-grams and lexical probabilities, is
+implemented using trees, so insertion and lookup operations on it have a runtime
+of $O(log\text{ } n)$.  This slows down our implementation, but $log\text{ } n$ grows so slowly
+that in practice this is not likely to be a serious detriment.  It should also
+be noted that all but the sneakiest implementations of hashes have amortized
+$log\text{ } n$  insertion time.
+
+Otherwise, because of the memoization we use, our implementation should have the
+same running time as other Viterbi implementations.  We observed that tagging
+and printing an average sentence takes about half a second.
+
+We also decided to use Haskell's built-in arbitrary precision arithmetic
+(dealing with probabilities as ratios of integers, which are unbounded in size) to
+avoid the vagaries of floating point errors.  Because this is tightly integrated
+into Haskell, the implementation was actually simplified from what it would have
+taken to write it using logarithmic arithmetic (which our previous project
+demonstrated was nearly as accurate for n-gram models of language, and is likely
+just as accurate here), but it slows down the code considerably.  We consider
+this an acceptable trade-off.
 
 %2. Experiments. Motivate and describe the experiments that you ran.
-%What were your hupotheses as to what would happen?
+%What were your hypotheses as to what would happen?
 \section{Experiments}
+Initially, we planned on testing the effects of different system components
+on the score. We decided to vary n-gram length, unknown word handling and
+n-gram smoothing to see how these three components affected performance.
+
 As we were developing the system, we noticed that some components performed
-very poorly with small training sets. 
-We studied interactions between training set size and system components.
+very poorly with small training sets. Specifically, we found our approach to
+unknown word handling to work quite miserably on small test sets. Thus,
+we also studied interactions between training set size and system components.
+
+We used a $2\times2\times2$ factorial design to test the effects of the different
+system components and their interactions on different system components.
+The three factors in this design were
+\begin{enumerate}
+\item n-gram length (bigram or trigram)
+\item n-gram smoothing (on or off)
+\item unknown word handling (on or off)
+\end{enumerate}
+For two of the eight treatment combinations in this design, we also tested
+different training corpus sizes. We chose two treatment combinations that were
+identical except for the handling of unknown words so that we could test
+for an interaction between unknown word handling and training corpus size;
+for this sub-experiment held n-gram length constant (bigram) and n-gram
+smoothing constant (on) while varying unknown word handling (on or off)
+and corpus size. For this sub-experiment, we used two training corpus sizes
+\begin{itemize}
+\item 100,000 words
+\item 996,759 words (full corpus)
+\end{itemize}
+This sub-experiment was thus a $2\times2$ factorial experiment run for
+bigrams with bigram smoothing on.
+
+We had four hypotheses
+\begin{itemize}
+\item The best performing treatment combination will be n-gram length 3,
+n-gram smoothing on, unknown word handling off and the full corpus size.
+\item We also hypothesized that unknown word handling will generally
+decrease performance
+\item A smaller training corpus will result in a lower score.
+\item Unknown word handling will decrease performance more when the
+training corpus is small than when the training corpus is large
+\end{itemize}
 
 \begin{table}
 \begin{tabular}{lcccc}
@@ -46,10 +115,8 @@ We studied interactions between training set size and system components.
 \cmidrule{2-5}
        & Training size & $n$-gram length & $n$-gram smoothing & UNK\\
 \cmidrule{2-5}
-Levels & 100     &  2  & None    & None \\
-       & 1000    &  3  & Add One & First occurrance  \\
-       & \vdots  &  \vdots  &     &      &      \\
-       & 996759  &  5  &     &      &      \\
+Levels &  10000   &  2  & None    & None \\
+       & 996759   &  3  & Add One & First occurrance  \\
 \cmidrule{2-5}
 %\bottomrule
 \end{tabular}
@@ -66,7 +133,7 @@ aim to target all of them if time allows.
 %The document should describe the baseline system, report the baseline
 %predictions for the task, and explain how you got them(e.g. wrote your
 %own code, used a package, used the web-based scorer).
-\section{Baseline system}
+\subsection{Baseline system}
 Our baseline system includes n-gram extraction,
 but we do not use it.
 It does not include the hidden Markov model either.
@@ -81,24 +148,14 @@ most likely tag.
 Unknown words are tagged as proper noun.
 The baseline system does not do any smoothing.
 
-The predictions from the baseline system had a score of 47.83\%
+The predictions from the baseline system had a score of 93\%
 from the prediction submission form.
-
-%3. The code for the baseline system if you are implementing from
-%scratch. If you are using a package, do not submit the code.
-
-\section{The Code}
-
-We recognize that Haskell is a language that may not be installed on your
-machine.  Instructions for running our code with (and without!) Haskell
-installed are included in our \verb+Readme+.
 
 %3. Results. Summarize the performance of your system on both the
 %training and test data. Minimally, you should compare your results
 %to the baseline. Please put the results into clearly labeled tables or
 %diagrams and include a written summary of the results.
 \section{Results}
-
 
 %4. Discussion of the results. This section should include any observa-
 %tions regarding your system’s performance — e.g. When did it work
@@ -109,5 +166,17 @@ installed are included in our \verb+Readme+.
 %of training data provided. You can come up with a better baseline and
 %compare your systems against that.
 \section{Discussion}
+
+As expected, each factor of 10 increase in training set size led to a
+significant increase in accuracy.  This is because more and more words are known
+(particularly for the 10,000 word case, there were likely many words that were
+simply not in the corpus).
+
+While the baseline system was better than our Viterbi model, this advantage is
+unlikely to scale as more data is fed into Viterbi - if we had a training corpus
+of 10s of millions of words, we would probably see another increase in accuracy
+and be able to beat out the baseline system.  Further tweaking would also likely
+increase accuracy; there are many variables we did not explore - for example,
+stripping uppercase from the input.
 
 \end{document}

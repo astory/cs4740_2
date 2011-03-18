@@ -147,8 +147,13 @@ main = do
     training <- getContents
     withFile "pos_corpora/test-obs.pos" ReadMode (\handle -> do 
         test <- hGetContents handle
+<<<<<<< HEAD
         let unk = True 
             smooth = False-- add-one smoothing
+=======
+        let unk =  False
+            smooth = False -- add-one smoothing
+>>>>>>> 95e56eed5be66469248cba67933935f2507fe4d6
             tagged_words = (if unk then unktags else (\x->x)) $ posTag training
             sents = sentences tagged_words
             sents' = map (map swap) sents
@@ -156,7 +161,7 @@ main = do
             tag'word = val'key sents'
 
             (tags, words) = split_tags sents
-            taggrams = safe_ngram_tally 3 tags
+            taggrams = safe_ngram_tally 2 tags
             gram_counts = map count_dict taggrams
             observed_words = S.fromList (concat words)
 
