@@ -21,9 +21,9 @@ source('plot_results.R')
 
 %which data set(s) and algorithm(s) will you include? will you implement the
 \subsection{Data set}
-We will study part-of-speech tagging.
-\subsection{Algorithms}
+We developed a part-of-speech tagger.
 
+\subsection{Algorithms}
 We implemented our tagger in Haskell, using memoization instead of the
 traditional table-based Viterbi implementation (They are equivalent, but
 memoization is more natural for functional programming languages like Haskell).
@@ -44,7 +44,7 @@ the tag is ``NNP'' and 0 otherwise.  We have shipped the code with a default of
 bigrams, smoothing and no unknown handling.
 
 We also implemented add-one smoothing, which is similarly controlled by a single
-boolean flag.
+Boolean flag.
 
 We should note that Haskell's implementation of Map, the hash-like data
 structure we rely on heavily for looking up n-grams and lexical probabilities,
@@ -121,7 +121,7 @@ training corpus is small than when the training corpus is large
        & Training size & $n$-gram length & $n$-gram smoothing & UNK\\
 \cmidrule{2-5}
 Levels &  10000 words  &  Bigram  & None    & None \\
-       & 996759 words  &  Trigram & Add One & First occurrance  \\
+       & 996759 words  &  Trigram & Add One & First occurrence  \\
 \cmidrule{2-5}
 %\bottomrule
 \end{tabular}
@@ -192,7 +192,7 @@ do very well, but we suspect that, with another factor of 10 increase to the
 training data, we could probably do better than the baseline.
 
 The baseline only scales with more training data in that it knows about more
-words.  The hidden markov model learns the same relationships, but also learns
+words.  The hidden Markov model learns the same relationships, but also learns
 the n-gram tag model, which gets better and better as input size increases,
 while lexical probabilities stop improving once you've seen most of the words in
 English.
@@ -210,9 +210,9 @@ but unknown word handling on, performance was better with trigrams.
 Unknown word handling generally decreased performance. Whenever we turned
 unknown word handling on while keeping everything else the same, performance
 decreased substantially.  This is probably because, with our input set size,
-we've got a lot of instances of words that we only see once:  transforming them
-to unks means that we don't see them at all, which reduces the ability of our
-system to produce accurate results.
+there were many word tokens that occurred only once; transforming them
+to unknown word tokens means that we don't see them at all, which reduces
+the ability of our system to produce accurate results.
 
 %with a mean decrease of
 %subset(results,size==996759&unk=='On')-subset(results,size==996759&unk=='Off')
@@ -220,11 +220,16 @@ system to produce accurate results.
 \subsection{Smoothing $\times$ unknown words}
 When smoothing was turned on, turning unknown word handling on or off had
 nearly no effect on performance for either of the $n$-gram lengths that we
-tested (table \ref{tab:res}). This may be because smoothing was used
+tested (table \ref{tab:res}).
+
+This may have occurred because smoothing was used
 relatively infrequently when unknown word handling was on; when smoothing
 was off, the only lexemes that would return probabilities of zero were
 those for which no lexemes of that part of speech had been tagged as
-unknown during the training.
+unknown during the training. We may have observed more of a difference
+between these two system combinations if we had used a smaller
+training corpus such that there would be more parts of speech with
+unknown words.
 
 \subsection{Corpus size}
 Increasing the training corpus size invariably yielded result in a higher score.
@@ -241,7 +246,7 @@ word handling was on than when it was off.  One can see this graphically in
 figure \ref{fig:l}; the slopes of the two lines are different.  Note, however,
 that this interaction effect is quite small compared to the main effect of
 unknown word handling being turned on or off.  This is probably because
-transforming the first occurence of a word into an unk amplifies the effect of
+transforming the first occurrence of a word into an unk amplifies the effect of
 having a strong, deep training corpus.  There are more words proportionally that
 appear only once in shorter training corpora than in very long corpora that
 contain many more words than English does.
@@ -249,8 +254,9 @@ contain many more words than English does.
 \subsection{Limitations of the study}
 There are many variables that we did not explore in our study
 that could have improved performance.  For example, we did not determine the
-effects of reducing all the input to lower case, or writing a series of
-heuristics for choosing tags for words that we have not seen, without unking.
+effects of reducing all the input to lower case. Also, we could have written
+a series of heuristics for choosing tags for words that we have not seen
+instead of using our simpler method of handling unknown words.
 Such techniques would likely have pushed performance higher, above that of the
 baseline.
 
