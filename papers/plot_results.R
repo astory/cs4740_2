@@ -10,7 +10,7 @@ baseline=93
 startplot=function(x,xlab='N-gram length',mainadd='',...){
 	plot(score~x,results,type='n',axes=F,
 		xlab=xlab,
-                ylab='Score',ylim=c(0,100),
+                ylab='Score',ylim=c(-20,100),
 		main=paste('Performance',mainadd),
 		...
 	)
@@ -48,12 +48,12 @@ posPlot.l=function(){
 startplot.l(mainadd='using tag bigrams')
 results.l=results
 results.l$log=log(results.l$size)
-points(score~log,subset(results.l,n==2 & smooth.gram=='Off' & unk=='On'),type='l',lty=1,col=2)
+points(score~log,subset(results.l,n==2 & smooth.gram=='On' & unk=='Off'),type='l',lty=2,col=1)
 points(score~log,subset(results.l,n==2 & smooth.gram=='On' & unk=='On'),type='l',lty=2,col=2)
 
-legend('bottom',c('Smoothing off','Smoothing'),
-	lty=1:2,
-	col=2
+legend('bottom',c('UNK off','UNK on'),
+	lty=2,
+	col=1:2
 )
 }
 
