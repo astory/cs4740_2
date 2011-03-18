@@ -197,8 +197,17 @@ the n-gram tag model, which gets better and better as input size increases,
 while lexical probabilities stop improving once you've seen most of the words in
 English.
 
+\subsection{$n$-gram length}
+There was not a consistent effect of $n$-gram length on performance.
+With smoothing on and unknown word handling off, performance was
+similar for bigrams and trigrams. With unknown word handling on,
+bigrams performed better than trigrams. With smoothing off
+but unknown word handling on, performance was better with trigrams.
+
+
+
 \subsection{Unknown words}
-Unknown word handling with unks generally decreased performance. Whenever we turned
+Unknown word handling generally decreased performance. Whenever we turned
 unknown word handling on while keeping everything else the same, performance
 decreased substantially.  This is probably because, with our input set size,
 we've got a lot of instances of words that we only see once:  transforming them
@@ -207,6 +216,15 @@ system to produce accurate results.
 
 %with a mean decrease of
 %subset(results,size==996759&unk=='On')-subset(results,size==996759&unk=='Off')
+
+\subsection{Smoothing $\times$ unknown words}
+When smoothing was turned on, turning unknown word handling on or off had
+nearly no effect on performance for either of the $n$-gram lengths that we
+tested (table \ref{tab:res}). This may be because smoothing was used
+relatively infrequently when unknown word handling was on; when smoothing
+was off, the only lexemes that would return probabilities of zero were
+those for which no lexemes of that part of speech had been tagged as
+unknown during the training.
 
 \subsection{Corpus size}
 Increasing the training corpus size invariably yielded result in a higher score.
@@ -228,13 +246,13 @@ having a strong, deep training corpus.  There are more words proportionally that
 appear only once in shorter training corpora than in very long corpora that
 contain many more words than English does.
 
-As a final note, there are many variables that we did not explore in our study
+\subsection{Limitations of the study}
+There are many variables that we did not explore in our study
 that could have improved performance.  For example, we did not determine the
 effects of reducing all the input to lower case, or writing a series of
 heuristics for choosing tags for words that we have not seen, without unking.
 Such techniques would likely have pushed performance higher, above that of the
 baseline.
-
 
 \begin{table}
 \centering
@@ -257,4 +275,13 @@ baseline.
 ``Score'' is the percentage of words correctly tagged.
 Our baseline score was 93\%.}
 \end{table}
+
+\section{Conclusion}
+Our results demonstrate the importance of considering the interaction
+of various system components in building an effective system. None of our
+advanced features improved performance over the baseline. Also, some of
+our system components interacted with other components such that a change
+in performance caused by one new component was conditional on which
+other components were being used.
+
 \end{document}
