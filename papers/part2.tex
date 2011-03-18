@@ -36,8 +36,8 @@ With unknowns on, the first time we see a word in the training set, we transform
 it to \verb+<UNK>+.  When we look up the lexical probability of the word given a
 tag, if there are no instances of that word with that tag, we return instead the
 probability of \verb+<UNK>+ given that tag.  With unknowns off, we return 1 if
-the tag is ``NNP'' and 0 otherwise.  We have shipped the code with reasonable
-defaults.
+the tag is ``NNP'' and 0 otherwise.  We have shipped the code with a default of
+bigrams, smoothing and no unknown handling.
 
 We also implemented add-one smoothing, which is similarly controlled by a single
 boolean flag.
@@ -122,13 +122,6 @@ Levels &  10000   &  2  & None    & None \\
 \end{tabular}
 \caption{\label{tab:ind_vars}Independent variables for experiments on the final system with a Hidden Markov Model}
 \end{table}
-
-Our experiments will consider several of a variety of variables (table \ref{tab:ind_vars}): n-gram length,
-n-gram smoothing (Good-Turing or none), lexical probability smoothing, unknown
-word handling (counting the first occurrances of words as unknown) and
-whether a hidden Markov model is used (comparison to the baseline).
-We have not yet decided precisely which features we will implement, but we
-aim to target all of them if time allows.
 
 %The document should describe the baseline system, report the baseline
 %predictions for the task, and explain how you got them(e.g. wrote your
