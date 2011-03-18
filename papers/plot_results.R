@@ -1,49 +1,57 @@
 #source('experiment_design.R')
 #design=treatments
+lineCounts=c(10000,100000,996759)
 design=read.csv('experiment_design.csv')
 scores=read.csv('results.csv')
 results=merge(design,scores,by='file')
 baseline=93
 
-startplot=function(x,xlab='N-gram length',...){
+startplot=function(x,xlab='N-gram length',mainadd='',...){
 	plot(score~x,results,type='n',axes=F,
 		xlab=xlab,
-                ylab='Score (% correct)',
-		main='Performance of the part-of-speech tagger',
+                ylab='Score',ylim=c(0,100),
+		main=paste('Performance of the part-of-speech tagger',mainadd),
 		...
 	)
-	axis(2)
-	abline(h=baseline)
+	par(las=2);axis(2,at=c(seq(0,100,20),baseline),labels=c(paste(seq(0,100,20),'%',sep=''),'BL'));par(las=1)
+#	abline(h=baseline)
 }
-startplot.n=function() {
-	startplot(results$n)
+startplot.n=function(...) {
+	startplot(results$n,...)
 	axis(1,at=results$n)
 }
 
-startplot.l=function() {
-	startplot(results$log.train.line,xlab='Number of words in the training set')
-	axis(1,at=log(lineCounts),labels=lineCounts)
+startplot.l=function(...) {
+	startplot(log(results$size),xlab='Number of words in the training set',...)
+	axis(1,at=log(lineCounts),labels=as.character(lineCounts))
 }
 
-par(mfrow=c(2,3))
+#par(mfrow=c(2,3))
+pdf('plot1.pdf')
+startplot.n(mainadd='using the full training corpus')
 
-startplot.n()
-points(score~n,subset(results,smooth.gram=='On'),type='l')
-points(score~n,subset(results,smooth.gram=='Off'),type='l')
+points(score~n,subset(results,size==996759 & smooth.gram=='Off' & unk=='Off'),type='l',lty=1,col=1)
+points(score~n,subset(results,size==996759 & smooth.gram=='Off' & unk=='On'),type='l',lty=1,col=2)
+points(score~n,subset(results,size==996759 & smooth.gram=='On' & unk=='Off'),type='l',lty=2,col=1)
+points(score~n,subset(results,size==996759 & smooth.gram=='On' & unk=='On'),type='l',lty=2,col=2)
 
-startplot.n()
-points(score~n,subset(results,unk=='On'),type='l')
-points(score~n,subset(results,unk=='Off'),type='l')
 
+legend('bottom',c("Smoothing off, UNK off",'Smoothing off, UNK on,','Smoothing on, UNK off','Smoothing on, UNK on'),
+	lty=rep(1:2,each=2),
+	col=rep(1:2,2)
+)
 
 results.l=results
 results.l$log=log(results.l$size)
 
-startplot.l()
-points(score~log,subset(results.l,smooth.gram=='On'),type='l')
-points(score~log,subset(results.l,smooth.gram=='Off'),type='l')
+
+dev.off()
 
 startplot.l()
-points(score~log,subset(results.l,unk=='On'),type='l')
-points(score~log,subset(results.l,unk=='Off'),type='l')
+points(score~log,subset(results.l,smooth.gram=='On'),type='p')
+points(score~log,subset(results.l,smooth.gram=='Off'),type='p')
+
+startplot.l()
+points(score~log,subset(results.l,unk=='On'),type='p')
+points(score~log,subset(results.l,unk=='Off'),type='p')
 
