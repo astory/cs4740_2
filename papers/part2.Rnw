@@ -1,8 +1,11 @@
 \documentclass{article}
 \usepackage{amsmath}
 \usepackage{booktabs}
-%By 11:59pm, Thursday, March 10th, you need to submit:
-%1. A short document that indicates your plan for the project
+
+<<echo=F>>=
+source('plot_results.R')
+@
+
 \newcommand{\osn}{\oldstylenums}
 \title{Sequence Tagging: Part One}
 \author{Thomas Levine and Alec Story\\\small{tkl\osn{22} \& avs\osn{38}}}
@@ -36,8 +39,8 @@ With unknowns on, the first time we see a word in the training set, we transform
 it to \verb+<UNK>+.  When we look up the lexical probability of the word given a
 tag, if there are no instances of that word with that tag, we return instead the
 probability of \verb+<UNK>+ given that tag.  With unknowns off, we return 1 if
-the tag is ``NNP'' and 0 otherwise.  We have shipped the code with reasonable
-defaults.
+the tag is ``NNP'' and 0 otherwise.  We have shipped the code with a default of
+bigrams, smoothing and no unknown handling.
 
 We also implemented add-one smoothing, which is similarly controlled by a single
 boolean flag.
@@ -123,13 +126,6 @@ Levels &  10000   &  2  & None    & None \\
 \caption{\label{tab:ind_vars}Independent variables for experiments on the final system with a Hidden Markov Model}
 \end{table}
 
-Our experiments will consider several of a variety of variables (table \ref{tab:ind_vars}): n-gram length,
-n-gram smoothing (Good-Turing or none), lexical probability smoothing, unknown
-word handling (counting the first occurrances of words as unknown) and
-whether a hidden Markov model is used (comparison to the baseline).
-We have not yet decided precisely which features we will implement, but we
-aim to target all of them if time allows.
-
 %The document should describe the baseline system, report the baseline
 %predictions for the task, and explain how you got them(e.g. wrote your
 %own code, used a package, used the web-based scorer).
@@ -156,6 +152,84 @@ from the prediction submission form.
 %to the baseline. Please put the results into clearly labeled tables or
 %diagrams and include a written summary of the results.
 \section{Results}
+None of our system adjustments yielded improved performance over the baseline.
+
+\begin{figure}
+\begin{center}
+<<echo=F,fig=T>>=
+posPlot.n()
+@
+\end{center}
+\caption{\label{fig:n}Score of predictions as a function of $n$-gram length, use of smoothing and use of unknown word handling with training on the full training corpus. ``BL'' refers to the baseline score.}
+\end{figure}
+
+\begin{figure}
+\begin{center}
+<<echo=F,fig=T>>=
+posPlot.l()
+@
+\end{center}
+\caption{\label{fig:l}Score of predictions as a function of training corpus size and use of unknown word handling with smoothed bigram probabilities. ``BL'' refers to the baseline score.}
+\end{figure}
+
+
+
+\subsection{Best performance}
+Aside from the baseline,
+the best performing system was combination bigrams with $n$-gram smoothing on,
+unknown word handling off and the full corpus size. With $n$-gram smoothing on
+and unknown word handling off, $n$-gram length did not seem to matter much;
+we found similar results for
+bigrams (\Sexpr{subset(results,unk=='Off'&smooth.gram=='On'&size==996759&n==2)$score}\%)
+and trigrams (\Sexpr{subset(results,unk=='Off'&smooth.gram=='On'&size==996759&n==3)$score}\%).
+
+\subsection{Unknown words}
+Unknown word handling generally decreased performance. Whenever we turned
+unknown word handling on while keeping everything else the same, performance
+decreased substantially.
+
+%with a mean decrease of
+%subset(results,size==996759&unk=='On')-subset(results,size==996759&unk=='Off')
+
+\subsection{Corpus size}
+Increasing the training corpus size invariably yielded result in a higher score.
+The increase in score was on the order of 10\% for every 1000\% increase
+in training corpus size.
+
+\subsection{Unknown words $\times$ corpus size}
+There was a mild interaction between unknown word handling and corpus
+size. When corpus size was varied, the difference in score was
+slightly larger when unknown word handling was on than when it was off.
+One can see this graphically in figure \ref{fig:l}; the slopes of
+the two lines are different.
+Note, however, that this interaction effect is quite small compared
+to the main effect of unknown word handling being turned on or off.
+
+
+\begin{table}
+\centering
+\label{tab:mytable}
+<<mytable,echo=F,results=tex>>=
+       library(xtable)
+       results_=results[c('n','smooth.gram','unk','size','score')]
+       names(results)=c('n','Smoothing','UNK','Size','Score')
+       mat <- xtable(results_)
+       print(mat,
+             sanitize.text.function = function(x){x},
+             floating=FALSE,
+             hline.after=NULL)
+@
+\caption{\label{tab:res}All of our non-baseline results are presented in this table.
+``n'' is the $n$-gram length, where 2 is bigram and 3 is trigram.
+``Smoothing'' is whether $n$-gram smoothing was on or off.
+``UNK'' is whether unknown word handling was on or off.
+``Size'' refers to the number of words in the training corpus.
+``Score'' is the percentage of words correctly tagged.
+Our baseline score was 93\%.}
+\end{table}
+
+
+
 
 %4. Discussion of the results. This section should include any observa-
 %tions regarding your system’s performance — e.g. When did it work
