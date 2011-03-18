@@ -157,7 +157,6 @@ from the prediction submission form.
 %diagrams and include a written summary of the results.
 \section{Results}
 
-
 %4. Discussion of the results. This section should include any observa-
 %tions regarding your system’s performance — e.g. When did it work
 %well, when did it fail, why? How might you improve the system?
@@ -167,5 +166,17 @@ from the prediction submission form.
 %of training data provided. You can come up with a better baseline and
 %compare your systems against that.
 \section{Discussion}
+
+As expected, each factor of 10 increase in training set size led to a
+significant increase in accuracy.  This is because more and more words are known
+(particularly for the 10,000 word case, there were likely many words that were
+simply not in the corpus).
+
+While the baseline system was better than our Viterbi model, this advantage is
+unlikely to scale as more data is fed into Viterbi - if we had a training corpus
+of 10s of millions of words, we would probably see another increase in accuracy
+and be able to beat out the baseline system.  Further tweaking would also likely
+increase accuracy; there are many variables we did not explore - for example,
+stripping uppercase from the input.
 
 \end{document}
