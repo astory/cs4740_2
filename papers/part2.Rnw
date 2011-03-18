@@ -1,8 +1,11 @@
 \documentclass{article}
 \usepackage{amsmath}
 \usepackage{booktabs}
-%By 11:59pm, Thursday, March 10th, you need to submit:
-%1. A short document that indicates your plan for the project
+
+<<echo=F>>=
+source('plot_results.R')
+@
+
 \newcommand{\osn}{\oldstylenums}
 \title{Sequence Tagging: Part One}
 \author{Thomas Levine and Alec Story\\\small{tkl\osn{22} \& avs\osn{38}}}
@@ -149,6 +152,25 @@ from the prediction submission form.
 %to the baseline. Please put the results into clearly labeled tables or
 %diagrams and include a written summary of the results.
 \section{Results}
+
+
+\begin{figure}
+\begin{center}
+<<echo=F,fig=T>>=
+posPlot.n()
+@
+\end{center}
+\caption{\label{fig:n}Score of predictions as a function of $n$-gram length, use of smoothing and use of unknown word handling with training on the full training corpus. ``BL'' refers to the baseline score.}
+\end{figure}
+
+\begin{figure}
+\begin{center}
+<<echo=F,fig=T>>=
+posPlot.l()
+@
+\end{center}
+\caption{\label{fig:n}Score of predictions as a function of training corpus size and use of unknown word handling with smoothed bigram probabilities. ``BL'' refers to the baseline score.}
+\end{figure}
 
 %4. Discussion of the results. This section should include any observa-
 %tions regarding your system’s performance — e.g. When did it work
