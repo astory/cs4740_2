@@ -3,6 +3,7 @@
 design=read.csv('experiment_design.csv')
 scores=read.csv('results.csv')
 results=merge(design,scores,by='file')
+baseline=93
 
 startplot=function(x,xlab='N-gram length',...){
 	plot(score~x,results,type='n',axes=F,
@@ -12,6 +13,7 @@ startplot=function(x,xlab='N-gram length',...){
 		...
 	)
 	axis(2)
+	abline(h=baseline)
 }
 startplot.n=function() {
 	startplot(results$n)
