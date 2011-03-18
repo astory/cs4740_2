@@ -35,20 +35,21 @@ like Haskell.
 %2. Experiments. Motivate and describe the experiments that you ran.
 %What were your hupotheses as to what would happen?
 \section{Experiments}
-
+As we were developing the system, we noticed that some components performed
+very poorly with small training sets. 
+We studied interactions between training set size and system components.
 
 \begin{table}
 \begin{tabular}{lcccc}
 %\toprule
 & \multicolumn{4}{c}{Factors} \\
 \cmidrule{2-5}
-& & \multicolumn{2}{c}{Smoothing} \\
-\cmidrule{3-4}
-       & Training size & $n$-gram length & $n$-gram & Lexical & UNK\\
+       & Training size & $n$-gram length & $n$-gram smoothing & UNK\\
 \cmidrule{2-5}
-Levels & 100     &  2  & None        & None        & None \\
-       & 1000    &  3  & Add One & Add One & First occurrance  \\
-       & \vdots  &  \vdots  &             &             &      \\
+Levels & 100     &  2  & None    & None \\
+       & 1000    &  3  & Add One & First occurrance  \\
+       & \vdots  &  \vdots  &     &      &      \\
+       & 996759  &  5  &     &      &      \\
 \cmidrule{2-5}
 %\bottomrule
 \end{tabular}
