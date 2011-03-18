@@ -142,16 +142,13 @@ viterbi unk smooth
 count_dict :: Ord k => M.Map k Int -> Int
 count_dict m = M.fold (+) 0 m
 
-get_words'unk :: Bool -> ( String -> [(String,String)] )
-get_words'unk True  = unkFirst . posTag
-get_words'unk False = posTag
 
 main = do
     training <- getContents
     withFile "pos_corpora/test-obs.pos" ReadMode (\handle -> do 
         test <- hGetContents handle
         let unk = False 
-            smooth = True -- add-one smoothing
+            smooth = False -- add-one smoothing
             tagged_words = (if unk then unktags else (\x->x)) $ posTag training
             sents = sentences tagged_words
             sents' = map (map swap) sents
