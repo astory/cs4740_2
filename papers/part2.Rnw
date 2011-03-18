@@ -153,6 +153,40 @@ from the prediction submission form.
 %diagrams and include a written summary of the results.
 \section{Results}
 
+\subsection{Best performance}
+The best performing system was combination bigrams with $n$-gram smoothing on,
+unknown word handling off and the full corpus size. With $n$-gram smoothing on
+and unknown word handling off, $n$-gram length did not seem to matter much;
+we found similar results for
+bigrams (\Sexpr{subset(results,unk=='Off'&smooth.gram=='On'&size==996759&n==2)$score}\%)
+and trigrams (\Sexpr{subset(results,unk=='Off'&smooth.gram=='On'&size==996759&n==2)$score}\%).
+
+\subsection{Unknown words}
+Unknown word handling generally decreased performance. Whenever we turned
+unknown word handling on while keeping everything else the same, performance
+decreased substantially.
+
+%with a mean decrease of
+%subset(results,size==996759&unk=='On')-subset(results,size==996759&unk=='Off')
+
+\subsection{Corpus size}
+Increasing the training corpus size invariably yielded result in a higher score.
+The increase in score was on the order of 10\% for every 1000\% increase
+in training corpus size.
+
+\subsection{Unknown words $\times$ corpus size}
+There was a mild interaction between unknown word handling and corpus
+size. When corpus size was varied, the difference in score was
+slightly larger when unknown word handling was on than when it was off.
+One can see this graphically in figure \ref{fig:l}; the slopes of
+the two lines are different.
+Note, however, that this interaction effect is quite small compared
+to the main effect of unknown word handling being turned on or off.
+
+\end{itemize}
+
+
+
 
 \begin{figure}
 \begin{center}
