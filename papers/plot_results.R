@@ -26,31 +26,22 @@ startplot.l=function() {
 par(mfrow=c(2,3))
 
 startplot.n()
-points(score~n,subset(results,smooth.gram=='None'),type='l')
-points(score~n,subset(results,smooth.gram=='AddOne'),type='l')
-points(score~n,subset(results,smooth.gram=='GoodTuring'),type='l')
+points(score~n,subset(results,smooth.gram=='On'),type='l')
+points(score~n,subset(results,smooth.gram=='Off'),type='l')
 
 startplot.n()
-points(score~n,subset(results,smooth.lex=='None'),type='l')
-points(score~n,subset(results,smooth.lex=='AddOne'),type='l')
-points(score~n,subset(results,smooth.lex=='GoodTuring'),type='l')
+points(score~n,subset(results,unk=='On'),type='l')
+points(score~n,subset(results,unk=='Off'),type='l')
 
-startplot.n()
-points(score~n,subset(results,unk=='None'),type='l')
-points(score~n,subset(results,unk=='FirstOccurrance'),type='l')
-points(score~n,subset(results,unk=='Count=1'),type='l')
+
+results.l=results
+results.l$log=log(results.l$size)
 
 startplot.l()
-points(score~log.train.line,subset(results,smooth.gram=='None'),type='l')
-points(score~log.train.line,subset(results,smooth.gram=='AddOne'),type='l')
-points(score~log.train.line,subset(results,smooth.gram=='GoodTuring'),type='l')
+points(score~log,subset(results.l,smooth.gram=='On'),type='l')
+points(score~log,subset(results.l,smooth.gram=='Off'),type='l')
 
 startplot.l()
-points(score~log.train.line,subset(results,smooth.lex=='None'),type='l')
-points(score~log.train.line,subset(results,smooth.lex=='AddOne'),type='l')
-points(score~log.train.line,subset(results,smooth.lex=='GoodTuring'),type='l')
+points(score~log,subset(results.l,unk=='On'),type='l')
+points(score~log,subset(results.l,unk=='Off'),type='l')
 
-startplot.l()
-points(score~log.train.line,subset(results,unk=='None'),type='l')
-points(score~log.train.line,subset(results,unk=='AddOne'),type='l')
-points(score~log.train.line,subset(results,unk=='GoodTuring'),type='l')
